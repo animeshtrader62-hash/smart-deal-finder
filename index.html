@@ -4,26 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Deal Finder - Best Deals from Flipkart, Myntra & Amazon</title>
+    <meta name="description" content="Find the best deals across Flipkart, Myntra, Amazon. Compare prices and earn rewards!">
+    <meta name="theme-color" content="#ff3f6c">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-container">
-            <div class="logo">
-                <span class="logo-icon">🛒</span>
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🔥</span>
                 <span class="logo-text">Smart<span class="logo-highlight">Deals</span></span>
-            </div>
+            </a>
             <nav class="nav-links">
-                <a href="#" class="nav-link active">Home</a>
-                <a href="#" class="nav-link">Top Deals</a>
-                <a href="#" class="nav-link">Categories</a>
+                <a href="#" class="nav-link active">🏷️ Deals</a>
+                <a href="#" class="nav-link">📦 Categories</a>
+                <a href="#" class="nav-link">ℹ️ About</a>
             </nav>
-            <div class="user-section" id="userSection">
-                <button class="login-btn" id="loginBtn" onclick="window.location.href='login.html'">Login</button>
+            <div class="header-right">
+                <div id="userSection">
+                    <button class="login-btn" onclick="window.location.href='login.html'">
+                        <span>👤</span> Login
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -31,20 +37,70 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Find the <span class="highlight">Best Deals</span> Instantly</h1>
-            <p>Compare prices across Flipkart, Myntra & Amazon in one place</p>
+            <div class="hero-badge">🎉 Up to 80% OFF Today!</div>
+            <h1>Find <span class="highlight">Amazing Deals</span> Across India</h1>
+            <p>Compare prices from Flipkart, Myntra, Amazon & more</p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">20+</span>
+                    <span class="stat-label">Products</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number">3</span>
+                    <span class="stat-label">Platforms</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-number">80%</span>
+                    <span class="stat-label">Max Discount</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-wave"></div>
+    </section>
+
+    <!-- Quick Filters -->
+    <section class="quick-filters">
+        <div class="quick-filters-container">
+            <button class="quick-btn hot" data-filter="discount" data-value="50">
+                <span class="quick-icon">🔥</span> 50%+ Off
+            </button>
+            <button class="quick-btn" data-filter="platform" data-value="Flipkart">
+                <span class="platform-dot flipkart"></span> Flipkart
+            </button>
+            <button class="quick-btn" data-filter="platform" data-value="Myntra">
+                <span class="platform-dot myntra"></span> Myntra
+            </button>
+            <button class="quick-btn" data-filter="platform" data-value="Amazon">
+                <span class="platform-dot amazon"></span> Amazon
+            </button>
+            <button class="quick-btn" data-filter="category" data-value="Shoes">👟 Shoes</button>
+            <button class="quick-btn" data-filter="category" data-value="Mobile">📱 Mobiles</button>
+            <button class="quick-btn" data-filter="category" data-value="Electronics">🎧 Electronics</button>
         </div>
     </section>
 
     <!-- Filters Section -->
     <section class="filters-section">
         <div class="filters-container">
-            <h2 class="filters-title">🔍 Search Products</h2>
-            
-            <div class="filters-grid">
+            <div class="filters-header">
+                <h3 class="filters-title">🎯 Advanced Filters</h3>
+                <button class="filters-toggle" id="filtersToggle">
+                    <span>Show Filters</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+            </div>
+            <div class="filters-grid" id="filtersGrid">
+                <!-- Search -->
+                <div class="filter-group">
+                    <label for="searchQuery">🔍 Search</label>
+                    <input type="text" id="searchQuery" placeholder="Search products...">
+                </div>
+
                 <!-- Platform -->
                 <div class="filter-group">
-                    <label for="platform">Platform</label>
+                    <label for="platform">🏪 Platform</label>
                     <select id="platform">
                         <option value="">All Platforms</option>
                         <option value="Flipkart">Flipkart</option>
@@ -55,37 +111,45 @@
 
                 <!-- Category -->
                 <div class="filter-group">
-                    <label for="category">Category</label>
-                    <input type="text" id="category" placeholder="e.g., Shoes, Mobile, Laptop">
+                    <label for="category">📂 Category</label>
+                    <select id="category">
+                        <option value="">All Categories</option>
+                        <option value="Mobile">Mobiles</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Shoes">Shoes</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Home">Home & Kitchen</option>
+                    </select>
                 </div>
 
                 <!-- Brand -->
                 <div class="filter-group">
-                    <label for="brand">Brand</label>
-                    <input type="text" id="brand" placeholder="e.g., Nike, Samsung, HP">
+                    <label for="brand">🏷️ Brand</label>
+                    <select id="brand">
+                        <option value="">All Brands</option>
+                    </select>
                 </div>
 
-                <!-- Min Price -->
+                <!-- Price Range -->
                 <div class="filter-group">
-                    <label for="minPrice">Min Price (₹)</label>
+                    <label for="minPrice">💰 Min Price (₹)</label>
                     <input type="number" id="minPrice" placeholder="0" min="0">
                 </div>
 
-                <!-- Max Price -->
                 <div class="filter-group">
-                    <label for="maxPrice">Max Price (₹)</label>
-                    <input type="number" id="maxPrice" placeholder="100000" min="0">
+                    <label for="maxPrice">💰 Max Price (₹)</label>
+                    <input type="number" id="maxPrice" placeholder="No limit" min="0">
                 </div>
 
                 <!-- Min Discount -->
                 <div class="filter-group">
-                    <label for="minDiscount">Min Discount (%)</label>
+                    <label for="minDiscount">🏷️ Min Discount (%)</label>
                     <input type="number" id="minDiscount" placeholder="0" min="0" max="100">
                 </div>
 
                 <!-- Sort By -->
                 <div class="filter-group">
-                    <label for="sortBy">Sort By</label>
+                    <label for="sortBy">📊 Sort By</label>
                     <select id="sortBy">
                         <option value="">Relevance</option>
                         <option value="price_low">Price: Low to High</option>
@@ -100,36 +164,27 @@
                     <button class="search-btn" id="searchBtn">
                         <span class="btn-icon">🔍</span> Search Deals
                     </button>
-                    <button class="clear-btn" id="clearBtn">Clear</button>
+                    <button class="clear-btn" id="clearBtn">✕ Clear</button>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Quick Filters -->
-    <section class="quick-filters">
-        <div class="quick-filters-container">
-            <button class="quick-btn" data-filter="discount" data-value="50">🔥 50%+ Off</button>
-            <button class="quick-btn" data-filter="platform" data-value="Flipkart">Flipkart</button>
-            <button class="quick-btn" data-filter="platform" data-value="Myntra">Myntra</button>
-            <button class="quick-btn" data-filter="platform" data-value="Amazon">Amazon</button>
-            <button class="quick-btn" data-filter="category" data-value="Shoes">👟 Shoes</button>
-            <button class="quick-btn" data-filter="category" data-value="Mobile">📱 Mobiles</button>
-            <button class="quick-btn" data-filter="category" data-value="Electronics">🎧 Electronics</button>
         </div>
     </section>
 
     <!-- Loading Indicator -->
     <div class="loading-container" id="loadingContainer" style="display: none;">
         <div class="loading-spinner"></div>
-        <p class="loading-text">🔍 Searching for best deals...</p>
-        <p class="loading-subtext">This may take up to 30 seconds on first load</p>
+        <p class="loading-text">🔍 Finding best deals for you...</p>
+        <p class="loading-subtext">This may take a moment on first load</p>
     </div>
 
     <!-- Results Section -->
     <section class="results-section">
         <div class="results-header" id="resultsHeader" style="display: none;">
             <h2 id="resultsCount">Found 0 products</h2>
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid" title="Grid View">▦</button>
+                <button class="view-btn" data-view="list" title="List View">☰</button>
+            </div>
         </div>
 
         <div class="products-grid" id="productsGrid">
@@ -141,22 +196,32 @@
             <div class="no-results-icon">😕</div>
             <h3>No products found</h3>
             <p>Try adjusting your filters or search for something else</p>
+            <button class="reset-btn" onclick="clearFilters()">Reset Filters</button>
         </div>
 
         <!-- Initial State -->
         <div class="initial-state" id="initialState">
             <div class="initial-icon">🛍️</div>
             <h3>Start searching for deals!</h3>
-            <p>Use the filters above or click on quick filters to find amazing deals</p>
+            <p>Use the quick filters above or click Search to explore amazing deals</p>
+            <button class="explore-btn" id="exploreBtn">Explore All Deals</button>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <p>💰 Earn rewards on every purchase through our affiliate links</p>
-            <p class="footer-disclaimer">We may earn commission from purchases made through our links</p>
-            <p class="footer-copy">© 2024 SmartDeals. All rights reserved.</p>
+            <div class="footer-brand">
+                <span class="footer-logo">🔥 SmartDeals</span>
+                <p class="footer-tagline">Your Smart Shopping Companion</p>
+            </div>
+            <div class="footer-info">
+                <p>💰 Earn rewards on every purchase through our affiliate links</p>
+                <p class="footer-disclaimer">We may earn commission from purchases made through our links</p>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copy">© 2024 SmartDeals. Made with ❤️ in India</p>
+            </div>
         </div>
     </footer>
 
@@ -185,15 +250,46 @@
             if (user) {
                 const displayName = user.displayName || user.email.split('@')[0];
                 userSection.innerHTML = `
-                    <span style="color: white; margin-right: 10px;">👋 ${displayName}</span>
-                    <button class="login-btn" onclick="firebase.auth().signOut()">Logout</button>
+                    <div class="user-logged-in">
+                        <span class="user-avatar-mini">${displayName.charAt(0).toUpperCase()}</span>
+                        <span class="user-name">${displayName}</span>
+                        <button class="logout-btn-mini" onclick="firebase.auth().signOut()">Logout</button>
+                    </div>
                 `;
             } else {
                 userSection.innerHTML = `
-                    <button class="login-btn" onclick="window.location.href='login.html'">Login</button>
+                    <button class="login-btn" onclick="window.location.href='login.html'">
+                        <span>👤</span> Login
+                    </button>
                 `;
             }
         });
+
+        // Filters toggle for mobile
+        document.getElementById('filtersToggle').addEventListener('click', function() {
+            const filtersGrid = document.getElementById('filtersGrid');
+            const toggleIcon = this.querySelector('.toggle-icon');
+            const toggleText = this.querySelector('span:first-child');
+            
+            filtersGrid.classList.toggle('show');
+            if (filtersGrid.classList.contains('show')) {
+                toggleIcon.textContent = '▲';
+                toggleText.textContent = 'Hide Filters';
+            } else {
+                toggleIcon.textContent = '▼';
+                toggleText.textContent = 'Show Filters';
+            }
+        });
+
+        // Explore all deals button
+        document.getElementById('exploreBtn').addEventListener('click', function() {
+            document.getElementById('searchBtn').click();
+        });
+
+        // Clear filters function
+        function clearFilters() {
+            document.getElementById('clearBtn').click();
+        }
     </script>
     <script src="script.js"></script>
 </body>
