@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Deal Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #282c3f;
+            margin-bottom: 10px;
+        }
+
+        .login-header .logo-highlight {
+            color: #ff3f6c;
+        }
+
+        .login-header p {
+            color: #94969f;
+            font-size: 14px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            background: #f5f5f6;
+            padding: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #94969f;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #ff3f6c;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #535766;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #d4d5d9;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff3f6c;
+            box-shadow: 0 0 0 3px rgba(255, 63, 108, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+        }
+
+        .auth-btn.primary {
+            background: linear-gradient(135deg, #ff3f6c 0%, #ff6b6b 100%);
+            color: white;
+        }
+
+        .auth-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 63, 108, 0.4);
+        }
+
+        .auth-btn.google {
+            background: white;
+            color: #282c3f;
+            border: 1px solid #d4d5d9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .auth-btn.google:hover {
+            background: #f5f5f6;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #d4d5d9;
+        }
+
+        .divider span {
+            padding: 0 15px;
+            color: #94969f;
+            font-size: 13px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .error-message {
+            background: #ffe4e4;
+            color: #d32f2f;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #ff3f6c;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .user-info {
+            text-align: center;
+            display: none;
+        }
+
+        .user-info.show {
+            display: block;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff3f6c 0%, #ff6b6b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 32px;
+            color: white;
+        }
+
+        .user-info h3 {
+            font-size: 20px;
+            color: #282c3f;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            color: #94969f;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .logout-btn {
+            background: #f5f5f6;
+            color: #535766;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #e8e8e8;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Login/Signup Forms -->
+            <div id="authForms">
+                <div class="login-header">
+                    <div class="logo">🛒 Smart<span class="logo-highlight">Deals</span></div>
+                    <p>Login to save your preferences and get personalized deals</p>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="login">Login</button>
+                    <button class="tab-btn" data-tab="signup">Sign Up</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form active">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="auth-btn primary">Login</button>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signupForm" class="auth-form">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="signupName" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signupEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signupPassword" placeholder="Create a password (min 6 chars)" required minlength="6">
+                    </div>
+                    <button type="submit" class="auth-btn primary">Create Account</button>
+                </form>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <button class="auth-btn google" id="googleSignIn">
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+                        <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
+                        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+
+                <a href="index.html" class="back-link">← Back to Home</a>
+            </div>
+
+            <!-- User Info (shown when logged in) -->
+            <div id="userInfo" class="user-info">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <h3 id="userName">Welcome!</h3>
+                <p id="userEmail">user@email.com</p>
+                <button class="auth-btn primary" onclick="window.location.href='index.html'">Browse Deals</button>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+                <a href="index.html" class="back-link">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1He8dbkXc-EpGiB1nUB8Z4m9drOk0Ah4",
+            authDomain: "smart-deal-finder-3c8b5.firebaseapp.com",
+            projectId: "smart-deal-finder-3c8b5",
+            storageBucket: "smart-deal-finder-3c8b5.firebasestorage.app",
+            messagingSenderId: "290267259082",
+            appId: "1:290267259082:web:d3e16a1e58aa0ee558d433"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const authForms = document.getElementById('authForms');
+        const userInfo = document.getElementById('userInfo');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+
+        // Show/Hide Loading
+        function showLoading() {
+            loadingOverlay.classList.add('show');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('show');
+        }
+
+        // Show Error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show Success
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Tab Switching
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const tab = btn.dataset.tab;
+                if (tab === 'login') {
+                    loginForm.classList.add('active');
+                    signupForm.classList.remove('active');
+                } else {
+                    signupForm.classList.add('active');
+                    loginForm.classList.remove('active');
+                }
+            });
+        });
+
+        // Email/Password Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                showSuccess('Login successful!');
+            } catch (error) {
+                showError(error.message);
+            }
+            hideLoading();
+        });
+
+        // Email/Password Signup
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({ displayName: name });
+                showSuccess('Account created successfully!');
+            } catch (error) {
+                showError(error.message);
+            }
+            hideLoading();
+        });
+
+        // Google Sign In
+        document.getElementById('googleSignIn').addEventListener('click', async () => {
+            showLoading();
+            const provider = new firebase.auth.GoogleAuthProvider();
+
+            try {
+                await auth.signInWithPopup(provider);
+                showSuccess('Login successful!');
+            } catch (error) {
+                showError(error.message);
+            }
+            hideLoading();
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            showLoading();
+            try {
+                await auth.signOut();
+                showSuccess('Logged out successfully!');
+            } catch (error) {
+                showError(error.message);
+            }
+            hideLoading();
+        });
+
+        // Auth State Observer
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                authForms.style.display = 'none';
+                userInfo.classList.add('show');
+
+                document.getElementById('userName').textContent = user.displayName || 'Welcome!';
+                document.getElementById('userEmail').textContent = user.email;
+
+                // Set avatar
+                const avatar = document.getElementById('userAvatar');
+                if (user.photoURL) {
+                    avatar.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;">`;
+                } else {
+                    avatar.textContent = (user.displayName || user.email)[0].toUpperCase();
+                }
+
+                // Store user info in localStorage for other pages
+                localStorage.setItem('user', JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL
+                }));
+            } else {
+                // User is signed out
+                authForms.style.display = 'block';
+                userInfo.classList.remove('show');
+                localStorage.removeItem('user');
+            }
+        });
+    </script>
+</body>
+</html>

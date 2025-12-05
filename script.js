@@ -244,7 +244,5 @@ async function loadTopDeals() {
 // Load top deals when page loads
 document.addEventListener("DOMContentLoaded", loadTopDeals);
 
-// ===== Login Button (Placeholder for Phase 5) =====
-document.getElementById("loginBtn").addEventListener("click", () => {
-    alert("Login feature coming soon! 🔐\n\nThis will use Firebase Authentication with:\n• Phone OTP\n• Email/Password\n• Google Sign-in");
-});
+// ===== Login Button (Now using Firebase) =====
+// Login is handled in index.html with Firebase Auth
