@@ -2,33 +2,46 @@
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
 // ===== ExtraPe Affiliate Configuration =====
+// How it works: ExtraPe URL Replacer tracks URLs containing your affiliate ID
+// When user visits Flipkart with affid=bh7162, ExtraPe tracks the sale
 const EXTRAPE_CONFIG = {
     enabled: true,
-    affiliate_id: 'EPTG2069282',
-    tracking_code: '1009',
-    flipkart_affid: 'bh7162'
+    affiliate_id: 'EPTG2069282',      // Your ExtraPe ID
+    tracking_code: '1009',             // Your tracking code
+    flipkart_affid: 'bh7162'           // Your Flipkart affiliate ID
 };
 
-// Convert product URL to ExtraPe affiliate link
+// Convert product URL to affiliate link by adding tracking parameters
 function getAffiliateLink(originalUrl, platform) {
     if (!EXTRAPE_CONFIG.enabled) {
         return originalUrl;
     }
     
-    // ExtraPe format for Flipkart
-    if (platform && platform.toLowerCase() === 'flipkart') {
-        const encodedUrl = encodeURIComponent(originalUrl);
-        return `https://extrape.com/aff/${EXTRAPE_CONFIG.affiliate_id}?url=${encodedUrl}`;
+    try {
+        const url = new URL(originalUrl);
+        
+        // For Flipkart - add affiliate tracking parameters
+        if (platform && platform.toLowerCase() === 'flipkart') {
+            url.searchParams.set('affid', EXTRAPE_CONFIG.flipkart_affid);
+            url.searchParams.set('affExtParam1', EXTRAPE_CONFIG.affiliate_id);
+            url.searchParams.set('affExtParam2', EXTRAPE_CONFIG.tracking_code);
+            return url.toString();
+        }
+        
+        // For Myntra - add tracking parameters
+        if (platform && platform.toLowerCase() === 'myntra') {
+            url.searchParams.set('utm_source', 'affiliate');
+            url.searchParams.set('utm_medium', EXTRAPE_CONFIG.affiliate_id);
+            url.searchParams.set('utm_campaign', EXTRAPE_CONFIG.tracking_code);
+            return url.toString();
+        }
+        
+        // For Amazon or others, return original
+        return originalUrl;
+    } catch (e) {
+        // If URL parsing fails, return original
+        return originalUrl;
     }
-    
-    // ExtraPe format for Myntra
-    if (platform && platform.toLowerCase() === 'myntra') {
-        const encodedUrl = encodeURIComponent(originalUrl);
-        return `https://extrape.com/aff/${EXTRAPE_CONFIG.affiliate_id}?url=${encodedUrl}`;
-    }
-    
-    // For Amazon or others, return original (add EarnKaro later if needed)
-    return originalUrl;
 }
 
 // ===== DOM Elements =====
