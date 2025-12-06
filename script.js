@@ -24,6 +24,7 @@ const sortByInput = document.getElementById("sortBy");
 // ===== State =====
 let userWishlist = [];
 let currentUser = null;
+let productsCache = {}; // Store products by ID for wishlist
 
 // ===== Firestore Functions =====
 
@@ -361,6 +362,9 @@ function createProductCard(product) {
     const formattedOriginalPrice = formatPrice(product.original_price);
     const fallbackImage = "https://via.placeholder.com/250x200?text=No+Image";
     
+    // Cache product for wishlist
+    productsCache[product.id] = product;
+    
     const isInWishlist = userWishlist.some(p => p.id === product.id);
     const wishlistBtnClass = isInWishlist ? 'wishlist-btn active' : 'wishlist-btn';
     const wishlistIcon = isInWishlist ? '❤️' : '🤍';
@@ -368,11 +372,10 @@ function createProductCard(product) {
     return `
         <div class="product-card" data-product-id="${product.id}">
             <div class="product-image-container">
-                <img src="${product.image}" alt="${product.title}" class="product-image"
+                <img src="${product.image}" alt="${escapeHtml(product.title)}" class="product-image"
                     onerror="this.src='${fallbackImage}'" loading="lazy">
                 <button class="${wishlistBtnClass}" 
-                    data-product='${encodeURIComponent(JSON.stringify(product))}'
-                    onclick="handleWishlistClick(this)"
+                    onclick="handleWishlistClick('${product.id}')"
                     title="${isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}">
                     ${wishlistIcon}
                 </button>
@@ -380,8 +383,8 @@ function createProductCard(product) {
             </div>
             <div class="product-info">
                 <span class="product-platform ${platformClass}">${product.platform}</span>
-                <div class="product-brand">${product.brand}</div>
-                <h3 class="product-title">${product.title}</h3>
+                <div class="product-brand">${escapeHtml(product.brand)}</div>
+                <h3 class="product-title">${escapeHtml(product.title)}</h3>
                 <div class="product-price-section">
                     <span class="product-price">₹${formattedPrice}</span>
                     <span class="product-original-price">₹${formattedOriginalPrice}</span>
@@ -399,15 +402,19 @@ function createProductCard(product) {
     `;
 }
 
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 // Handle wishlist click
-function handleWishlistClick(btn) {
-    try {
-        const productData = decodeURIComponent(btn.dataset.product);
-        const product = JSON.parse(productData);
+function handleWishlistClick(productId) {
+    const product = productsCache[productId];
+    if (product) {
         toggleWishlist(product);
-    } catch (error) {
-        console.error("Wishlist click error:", error);
-        showError("Something went wrong");
+    } else {
+        showError("Product not found");
     }
 }
 
