@@ -1,50 +1,8 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
-// ===== EarnKaro Affiliate Configuration =====
-// Uses EarnKaro API to convert any URL to affiliate link
-const EARNKARO_CONFIG = {
-    enabled: true,
-    api_endpoint: `${API_BASE}/convert`  // Backend handles API call
-};
-
-// Affiliate link cache to avoid repeated API calls
-const affiliateLinkCache = new Map();
-
-// Convert product URL to affiliate link using EarnKaro API
-async function getAffiliateLink(originalUrl, platform) {
-    if (!EARNKARO_CONFIG.enabled) {
-        return originalUrl;
-    }
-    
-    // Check cache first
-    if (affiliateLinkCache.has(originalUrl)) {
-        return affiliateLinkCache.get(originalUrl);
-    }
-    
-    try {
-        // Call backend which calls EarnKaro API
-        const response = await fetch(`${EARNKARO_CONFIG.api_endpoint}?url=${encodeURIComponent(originalUrl)}`);
-        const data = await response.json();
-        
-        if (data.success && data.affiliate_url) {
-            affiliateLinkCache.set(originalUrl, data.affiliate_url);
-            return data.affiliate_url;
-        }
-        return originalUrl;
-    } catch (e) {
-        console.log("Affiliate conversion error:", e);
-        return originalUrl;
-    }
-}
-
-// Sync version for immediate use (uses cache or returns original)
-function getAffiliateLinkSync(originalUrl, platform) {
-    if (affiliateLinkCache.has(originalUrl)) {
-        return affiliateLinkCache.get(originalUrl);
-    }
-    // Schedule async conversion for next time
-    getAffiliateLink(originalUrl, platform);
+// Direct product links - no conversion needed for customer shopping
+function getProductUrl(originalUrl) {
     return originalUrl;
 }
 
@@ -107,7 +65,7 @@ function displayDealOfDay(deal) {
                     <span id="dealTimer">23:59:59</span>
                 </div>
                 <div class="deal-actions">
-                    <a href="${getAffiliateLinkSync(deal.affiliate_url, deal.platform)}" target="_blank" class="deal-buy-btn">
+                    <a href="${getProductUrl(deal.affiliate_url)}" target="_blank" class="deal-buy-btn">
                         Grab Deal 🛒
                     </a>
                     <button class="deal-wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="handleWishlistClick('${deal.id}')">
@@ -529,27 +487,6 @@ function displayProducts(data) {
     resultsHeader.style.display = "block";
     resultsCount.textContent = `Found ${data.count} products`;
     productsGrid.innerHTML = data.products.map(product => createProductCard(product)).join("");
-    
-    // Pre-convert affiliate links in background
-    preConvertAffiliateLinks(data.products);
-}
-
-// Pre-convert affiliate links for all products
-async function preConvertAffiliateLinks(products) {
-    for (const product of products) {
-        if (!affiliateLinkCache.has(product.affiliate_url)) {
-            try {
-                const affiliateUrl = await getAffiliateLink(product.affiliate_url, product.platform);
-                // Update the button href
-                const btn = document.querySelector(`[data-original-url="${product.affiliate_url}"]`);
-                if (btn) {
-                    btn.href = affiliateUrl;
-                }
-            } catch (e) {
-                console.log("Pre-convert error:", e);
-            }
-        }
-    }
 }
 
 // ===== Create Product Card =====
@@ -591,7 +528,7 @@ function createProductCard(product) {
                     <span class="rating-badge">${product.rating || 4.0} ★</span>
                     <span class="rating-count">(${formatCount(product.reviews || 100)} reviews)</span>
                 </div>
-                <a href="${getAffiliateLinkSync(product.affiliate_url, product.platform)}" target="_blank" rel="noopener noreferrer" class="buy-btn" data-original-url="${product.affiliate_url}" data-platform="${product.platform}">
+                <a href="${getProductUrl(product.affiliate_url)}" target="_blank" rel="noopener noreferrer" class="buy-btn">
                     Buy Now 🛒
                 </a>
             </div>
