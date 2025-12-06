@@ -1,70 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Deal Finder - Best Deals from Flipkart, Myntra & Amazon</title>
-    <meta name="description" content="Find the best deals across Flipkart, Myntra, Amazon. Compare prices and earn rewards!">
-    <meta name="theme-color" content="#ff3f6c">
+    <meta name="description" content="Find the best deals across Flipkart, Myntra, Amazon. Compare prices and earn rewards with EarnKaro!">
+    <meta name="theme-color" content="#6366f1">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Floating Background Elements -->
+    <div class="floating-bg">
+        <div class="floating-circle c1"></div>
+        <div class="floating-circle c2"></div>
+        <div class="floating-circle c3"></div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-container">
             <a href="index.html" class="logo">
-                <span class="logo-icon">🔥</span>
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                </div>
                 <span class="logo-text">Smart<span class="logo-highlight">Deals</span></span>
             </a>
+            
             <nav class="nav-links">
-                <a href="#" class="nav-link active">🏷️ Deals</a>
-                <a href="#" class="nav-link" id="wishlistNav">❤️ Wishlist <span class="wishlist-count" id="wishlistCount"></span></a>
-                <a href="#" class="nav-link" id="historyNav">🕐 History</a>
+                <a href="#" class="nav-link active" id="dealsNav">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    <span>Deals</span>
+                </a>
+                <a href="#" class="nav-link" id="wishlistNav">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span>Wishlist</span>
+                    <span class="nav-badge" id="wishlistCount"></span>
+                </a>
+                <a href="#" class="nav-link" id="historyNav">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>History</span>
+                </a>
+                <a href="#" class="nav-link" id="alertsNav">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span>Alerts</span>
+                </a>
             </nav>
+            
             <div class="header-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
                 <div id="userSection">
-                    <button class="login-btn" onclick="window.location.href='login.html'">
-                        <span>👤</span> Login
+                    <button class="login-btn glass" onclick="window.location.href='login.html'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>Login</span>
                     </button>
                 </div>
             </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="#" class="mobile-nav-link active" data-nav="deals">🏷️ Deals</a>
+        <a href="#" class="mobile-nav-link" data-nav="wishlist">❤️ Wishlist</a>
+        <a href="#" class="mobile-nav-link" data-nav="history">🕐 History</a>
+        <a href="#" class="mobile-nav-link" data-nav="alerts">🔔 Alerts</a>
+    </nav>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-badge">🎉 Up to 80% OFF Today!</div>
-            <h1>Find <span class="highlight">Amazing Deals</span> Across India</h1>
-            <p>Compare prices from Flipkart, Myntra, Amazon & more</p>
+            <div class="hero-badge glass">
+                <span class="badge-pulse"></span>
+                <span>🎉 Powered by EarnKaro</span>
+            </div>
+            <h1>Find <span class="gradient-text">Best Deals</span> & Earn Cashback</h1>
+            <p class="hero-subtitle">Compare prices across Flipkart, Myntra & Amazon. Every purchase earns you rewards!</p>
+            
+            <!-- Quick Search Bar -->
+            <div class="hero-search glass">
+                <div class="search-input-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="heroSearch" placeholder="Search for products, brands...">
+                </div>
+                <button class="hero-search-btn" id="heroSearchBtn">
+                    <span>Search</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+            </div>
+            
+            <!-- Stats -->
             <div class="hero-stats">
-                <div class="stat-item">
-                    <span class="stat-number">20+</span>
-                    <span class="stat-label">Products</span>
+                <div class="stat-item glass">
+                    <span class="stat-icon">🛍️</span>
+                    <div class="stat-content">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Stores</span>
+                    </div>
                 </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-number">3</span>
-                    <span class="stat-label">Platforms</span>
+                <div class="stat-item glass">
+                    <span class="stat-icon">💰</span>
+                    <div class="stat-content">
+                        <span class="stat-number">80%</span>
+                        <span class="stat-label">Max Off</span>
+                    </div>
                 </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-number">80%</span>
-                    <span class="stat-label">Max Discount</span>
+                <div class="stat-item glass">
+                    <span class="stat-icon">🎁</span>
+                    <div class="stat-content">
+                        <span class="stat-number">₹0</span>
+                        <span class="stat-label">Join Free</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="hero-wave"></div>
+        
+        <!-- Supported Stores -->
+        <div class="supported-stores">
+            <span class="stores-label">Supported Stores:</span>
+            <div class="store-logos">
+                <div class="store-logo flipkart" title="Flipkart">
+                    <span>F</span>
+                </div>
+                <div class="store-logo myntra" title="Myntra">
+                    <span>M</span>
+                </div>
+                <div class="store-logo amazon" title="Amazon">
+                    <span>A</span>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- Quick Filters -->
     <section class="quick-filters">
         <div class="quick-filters-container">
             <button class="quick-btn hot" data-filter="discount" data-value="50">
-                <span class="quick-icon">🔥</span> 50%+ Off
+                <span class="fire-icon">🔥</span> 50%+ Off
             </button>
             <button class="quick-btn" data-filter="platform" data-value="Flipkart">
                 <span class="platform-dot flipkart"></span> Flipkart
@@ -78,93 +161,154 @@
             <button class="quick-btn" data-filter="category" data-value="Shoes">👟 Shoes</button>
             <button class="quick-btn" data-filter="category" data-value="Mobile">📱 Mobiles</button>
             <button class="quick-btn" data-filter="category" data-value="Electronics">🎧 Electronics</button>
+            <button class="quick-btn" data-filter="category" data-value="Clothing">👕 Clothing</button>
         </div>
     </section>
 
     <!-- Filters Section -->
     <section class="filters-section">
-        <div class="filters-container">
+        <div class="filters-container glass">
             <div class="filters-header">
-                <h3 class="filters-title">🎯 Advanced Filters</h3>
+                <h3 class="filters-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    Advanced Filters
+                </h3>
                 <button class="filters-toggle" id="filtersToggle">
                     <span>Show Filters</span>
-                    <span class="toggle-icon">▼</span>
+                    <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
             </div>
             <div class="filters-grid" id="filtersGrid">
                 <!-- Search -->
                 <div class="filter-group">
-                    <label for="searchQuery">🔍 Search</label>
-                    <input type="text" id="searchQuery" placeholder="Search products...">
+                    <label for="searchQuery">Search</label>
+                    <div class="input-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="searchQuery" placeholder="Search products...">
+                    </div>
                 </div>
 
                 <!-- Platform -->
                 <div class="filter-group">
-                    <label for="platform">🏪 Platform</label>
-                    <select id="platform">
-                        <option value="">All Platforms</option>
-                        <option value="Flipkart">Flipkart</option>
-                        <option value="Myntra">Myntra</option>
-                        <option value="Amazon">Amazon</option>
-                    </select>
+                    <label for="platform">Platform</label>
+                    <div class="select-wrapper">
+                        <select id="platform">
+                            <option value="">All Platforms</option>
+                            <option value="Flipkart">Flipkart</option>
+                            <option value="Myntra">Myntra</option>
+                            <option value="Amazon">Amazon</option>
+                        </select>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
                 </div>
 
                 <!-- Category -->
                 <div class="filter-group">
-                    <label for="category">📂 Category</label>
-                    <select id="category">
-                        <option value="">All Categories</option>
-                        <option value="Mobile">Mobiles</option>
-                        <option value="Electronics">Electronics</option>
-                        <option value="Shoes">Shoes</option>
-                        <option value="Clothing">Clothing</option>
-                        <option value="Home">Home & Kitchen</option>
-                    </select>
+                    <label for="category">Category</label>
+                    <div class="select-wrapper">
+                        <select id="category">
+                            <option value="">All Categories</option>
+                            <option value="Mobile">Mobiles</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Shoes">Shoes</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Home">Home & Kitchen</option>
+                        </select>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
                 </div>
 
                 <!-- Brand -->
                 <div class="filter-group">
-                    <label for="brand">🏷️ Brand</label>
-                    <select id="brand">
-                        <option value="">All Brands</option>
-                    </select>
+                    <label for="brand">Brand</label>
+                    <div class="select-wrapper">
+                        <select id="brand">
+                            <option value="">All Brands</option>
+                        </select>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
                 </div>
 
                 <!-- Price Range -->
                 <div class="filter-group">
-                    <label for="minPrice">💰 Min Price (₹)</label>
-                    <input type="number" id="minPrice" placeholder="0" min="0">
+                    <label for="minPrice">Min Price (₹)</label>
+                    <div class="input-wrapper">
+                        <span class="input-prefix">₹</span>
+                        <input type="number" id="minPrice" placeholder="0" min="0">
+                    </div>
                 </div>
 
                 <div class="filter-group">
-                    <label for="maxPrice">💰 Max Price (₹)</label>
-                    <input type="number" id="maxPrice" placeholder="No limit" min="0">
+                    <label for="maxPrice">Max Price (₹)</label>
+                    <div class="input-wrapper">
+                        <span class="input-prefix">₹</span>
+                        <input type="number" id="maxPrice" placeholder="No limit" min="0">
+                    </div>
                 </div>
 
                 <!-- Min Discount -->
                 <div class="filter-group">
-                    <label for="minDiscount">🏷️ Min Discount (%)</label>
-                    <input type="number" id="minDiscount" placeholder="0" min="0" max="100">
+                    <label for="minDiscount">Min Discount (%)</label>
+                    <div class="input-wrapper">
+                        <span class="input-prefix">%</span>
+                        <input type="number" id="minDiscount" placeholder="0" min="0" max="100">
+                    </div>
                 </div>
 
                 <!-- Sort By -->
                 <div class="filter-group">
-                    <label for="sortBy">📊 Sort By</label>
-                    <select id="sortBy">
-                        <option value="">Relevance</option>
-                        <option value="price_low">Price: Low to High</option>
-                        <option value="price_high">Price: High to Low</option>
-                        <option value="discount">Highest Discount</option>
-                        <option value="rating">Highest Rating</option>
-                    </select>
+                    <label for="sortBy">Sort By</label>
+                    <div class="select-wrapper">
+                        <select id="sortBy">
+                            <option value="">Relevance</option>
+                            <option value="price_low">Price: Low to High</option>
+                            <option value="price_high">Price: High to Low</option>
+                            <option value="discount">Highest Discount</option>
+                            <option value="rating">Highest Rating</option>
+                        </select>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
                 </div>
 
-                <!-- Search Button -->
+                <!-- Action Buttons -->
                 <div class="filter-group filter-btn-group">
                     <button class="search-btn" id="searchBtn">
-                        <span class="btn-icon">🔍</span> Search Deals
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Search Deals
                     </button>
-                    <button class="clear-btn" id="clearBtn">✕ Clear</button>
+                    <button class="clear-btn" id="clearBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deal of the Day (Login Feature) -->
+    <section class="deal-of-day" id="dealOfDay" style="display: none;">
+        <div class="deal-container glass">
+            <div class="deal-badge">⚡ DEAL OF THE DAY</div>
+            <div class="deal-content">
+                <div class="deal-image">
+                    <img src="" alt="Deal of the day" id="dealImage">
+                </div>
+                <div class="deal-info">
+                    <span class="deal-platform" id="dealPlatform">Flipkart</span>
+                    <h3 class="deal-title" id="dealTitle">Loading...</h3>
+                    <div class="deal-pricing">
+                        <span class="deal-price" id="dealPrice">₹0</span>
+                        <span class="deal-original" id="dealOriginal">₹0</span>
+                        <span class="deal-discount" id="dealDiscount">0% OFF</span>
+                    </div>
+                    <div class="deal-timer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Ends in: <strong id="dealTimer">23:59:59</strong></span>
+                    </div>
+                    <a href="#" class="deal-btn" id="dealBtn" target="_blank">
+                        Grab Deal
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
                 </div>
             </div>
         </div>
@@ -172,9 +316,13 @@
 
     <!-- Loading Indicator -->
     <div class="loading-container" id="loadingContainer" style="display: none;">
-        <div class="loading-spinner"></div>
-        <p class="loading-text">🔍 Finding best deals for you...</p>
-        <p class="loading-subtext">This may take a moment on first load</p>
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <p class="loading-text">Finding best deals for you...</p>
+        <p class="loading-subtext">Comparing prices across stores</p>
     </div>
 
     <!-- Results Section -->
@@ -182,8 +330,12 @@
         <div class="results-header" id="resultsHeader" style="display: none;">
             <h2 id="resultsCount">Found 0 products</h2>
             <div class="view-toggle">
-                <button class="view-btn active" data-view="grid" title="Grid View">▦</button>
-                <button class="view-btn" data-view="list" title="List View">☰</button>
+                <button class="view-btn active" data-view="grid" title="Grid View">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+                <button class="view-btn" data-view="list" title="List View">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </button>
             </div>
         </div>
 
@@ -192,19 +344,80 @@
         </div>
 
         <!-- No Results -->
-        <div class="no-results" id="noResults" style="display: none;">
-            <div class="no-results-icon">😕</div>
+        <div class="no-results glass" id="noResults" style="display: none;">
+            <div class="no-results-icon">🔍</div>
             <h3>No products found</h3>
             <p>Try adjusting your filters or search for something else</p>
             <button class="reset-btn" onclick="clearFilters()">Reset Filters</button>
         </div>
 
         <!-- Initial State -->
-        <div class="initial-state" id="initialState">
-            <div class="initial-icon">🛍️</div>
-            <h3>Start searching for deals!</h3>
-            <p>Use the quick filters above or click Search to explore amazing deals</p>
-            <button class="explore-btn" id="exploreBtn">Explore All Deals</button>
+        <div class="initial-state glass" id="initialState">
+            <div class="initial-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+            </div>
+            <h3>Start exploring deals!</h3>
+            <p>Use quick filters above or search to find amazing deals</p>
+            <button class="explore-btn" id="exploreBtn">
+                <span>Explore All Deals</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+        </div>
+
+        <!-- URL Converter (Like Bot) -->
+        <div class="url-converter glass" id="urlConverter">
+            <div class="converter-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <h3>URL Converter</h3>
+                <span class="converter-badge">EarnKaro</span>
+            </div>
+            <p class="converter-desc">Paste any product URL to get affiliate link & earn cashback!</p>
+            <div class="converter-input-group">
+                <input type="text" id="urlInput" placeholder="Paste Flipkart, Myntra or Amazon URL...">
+                <button class="convert-btn" id="convertBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Convert
+                </button>
+            </div>
+            <div class="converter-result" id="converterResult" style="display: none;">
+                <div class="result-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span>Affiliate link ready!</span>
+                </div>
+                <div class="result-link">
+                    <input type="text" id="affiliateResult" readonly>
+                    <button class="copy-btn" id="copyBtn" title="Copy to clipboard">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <a href="#" id="affiliateOpenBtn" target="_blank" class="open-link-btn">
+                    Open Link
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Price Alerts Section (Login Feature) -->
+    <section class="alerts-section" id="alertsSection" style="display: none;">
+        <div class="alerts-container">
+            <div class="alerts-header glass">
+                <div class="alerts-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <h2>Price Drop Alerts</h2>
+                </div>
+                <p class="alerts-desc">Get notified when prices drop on your favorite products!</p>
+            </div>
+            <div class="alerts-list" id="alertsList">
+                <!-- Alerts will be loaded here -->
+            </div>
+            <div class="no-alerts glass" id="noAlerts">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                <h3>No price alerts yet</h3>
+                <p>Click the 🔔 icon on any product to set a price alert</p>
+            </div>
         </div>
     </section>
 
@@ -212,15 +425,43 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
-                <span class="footer-logo">🔥 SmartDeals</span>
+                <div class="footer-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span>SmartDeals</span>
+                </div>
                 <p class="footer-tagline">Your Smart Shopping Companion</p>
             </div>
-            <div class="footer-info">
-                <p>💰 Earn rewards on every purchase through our affiliate links</p>
-                <p class="footer-disclaimer">We may earn commission from purchases made through our links</p>
+            <div class="footer-features">
+                <div class="feature-item">
+                    <span class="feature-icon">💰</span>
+                    <span>Earn Cashback via EarnKaro</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🔔</span>
+                    <span>Price Drop Alerts</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">❤️</span>
+                    <span>Save to Wishlist</span>
+                </div>
+            </div>
+            <div class="footer-stores">
+                <span>Supported Stores:</span>
+                <div class="footer-store-logos">
+                    <span class="store-tag flipkart">Flipkart</span>
+                    <span class="store-tag myntra">Myntra</span>
+                    <span class="store-tag amazon">Amazon</span>
+                </div>
+            </div>
+            <div class="footer-telegram">
+                <a href="https://t.me/SmartDealFinderBot" target="_blank" class="telegram-btn glass">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    Join our Telegram Bot
+                </a>
             </div>
             <div class="footer-bottom">
                 <p class="footer-copy">© 2024 SmartDeals. Made with ❤️ in India</p>
+                <p class="footer-disclaimer">We earn commission from purchases made through our affiliate links</p>
             </div>
         </div>
     </footer>
@@ -257,32 +498,51 @@
                 const displayName = user.displayName || user.email.split('@')[0];
                 userSection.innerHTML = `
                     <div class="user-logged-in">
-                        <span class="user-avatar-mini">${displayName.charAt(0).toUpperCase()}</span>
+                        <div class="user-avatar">${displayName.charAt(0).toUpperCase()}</div>
                         <span class="user-name">${displayName}</span>
-                        <button class="logout-btn-mini" onclick="firebase.auth().signOut()">Logout</button>
+                        <button class="logout-btn glass" onclick="firebase.auth().signOut()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        </button>
                     </div>
                 `;
+                // Show login-only features
+                document.getElementById('dealOfDay').style.display = 'block';
             } else {
                 userSection.innerHTML = `
-                    <button class="login-btn" onclick="window.location.href='login.html'">
-                        <span>👤</span> Login
+                    <button class="login-btn glass" onclick="window.location.href='login.html'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>Login</span>
                     </button>
                 `;
+                // Hide login-only features
+                document.getElementById('dealOfDay').style.display = 'none';
             }
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
         });
 
         // Filters toggle for mobile
         document.getElementById('filtersToggle').addEventListener('click', function() {
             const filtersGrid = document.getElementById('filtersGrid');
             const toggleIcon = this.querySelector('.toggle-icon');
-            const toggleText = this.querySelector('span:first-child');
+            const toggleText = this.querySelector('span');
             
             filtersGrid.classList.toggle('show');
             if (filtersGrid.classList.contains('show')) {
-                toggleIcon.textContent = '▲';
+                toggleIcon.style.transform = 'rotate(180deg)';
                 toggleText.textContent = 'Hide Filters';
             } else {
-                toggleIcon.textContent = '▼';
+                toggleIcon.style.transform = 'rotate(0deg)';
                 toggleText.textContent = 'Show Filters';
             }
         });
@@ -290,6 +550,25 @@
         // Explore all deals button
         document.getElementById('exploreBtn').addEventListener('click', function() {
             document.getElementById('searchBtn').click();
+        });
+
+        // Hero search
+        document.getElementById('heroSearchBtn').addEventListener('click', function() {
+            const query = document.getElementById('heroSearch').value;
+            document.getElementById('searchQuery').value = query;
+            document.getElementById('searchBtn').click();
+        });
+        
+        document.getElementById('heroSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('heroSearchBtn').click();
+            }
+        });
+
+        // Mobile menu
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.getElementById('mobileNav').classList.toggle('show');
         });
 
         // Clear filters function

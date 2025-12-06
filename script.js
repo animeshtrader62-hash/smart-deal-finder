@@ -11,6 +11,17 @@ const EARNKARO_CONFIG = {
 // Affiliate link cache to avoid repeated API calls
 const affiliateLinkCache = new Map();
 
+// Supported stores for URL converter
+const SUPPORTED_STORES = [
+    { name: 'Amazon', domain: 'amazon.in', icon: '🛒', color: '#ff9900' },
+    { name: 'Flipkart', domain: 'flipkart.com', icon: '🛍️', color: '#2874f0' },
+    { name: 'Myntra', domain: 'myntra.com', icon: '👗', color: '#ff3f6c' },
+    { name: 'Ajio', domain: 'ajio.com', icon: '👔', color: '#2874f0' },
+    { name: 'Nykaa', domain: 'nykaa.com', icon: '💄', color: '#fc2779' },
+    { name: 'Meesho', domain: 'meesho.com', icon: '🛒', color: '#570741' },
+    { name: 'Tata CLiQ', domain: 'tatacliq.com', icon: '🏷️', color: '#5c2d91' }
+];
+
 // Convert product URL to affiliate link using EarnKaro API
 async function getAffiliateLink(originalUrl, platform) {
     if (!EARNKARO_CONFIG.enabled) {
@@ -46,6 +57,227 @@ function getAffiliateLinkSync(originalUrl, platform) {
     // Schedule async conversion for next time
     getAffiliateLink(originalUrl, platform);
     return originalUrl;
+}
+
+// ===== URL Converter Functions =====
+function detectPlatform(url) {
+    const urlLower = url.toLowerCase();
+    for (const store of SUPPORTED_STORES) {
+        if (urlLower.includes(store.domain)) {
+            return store;
+        }
+    }
+    return null;
+}
+
+async function convertUrl() {
+    const urlInput = document.getElementById('urlInput');
+    const convertBtn = document.getElementById('convertBtn');
+    const convertResult = document.getElementById('convertResult');
+    
+    if (!urlInput || !convertBtn || !convertResult) return;
+    
+    const url = urlInput.value.trim();
+    
+    if (!url) {
+        showConverterResult('error', 'Please enter a product URL');
+        return;
+    }
+    
+    // Validate URL format
+    try {
+        new URL(url);
+    } catch {
+        showConverterResult('error', 'Please enter a valid URL');
+        return;
+    }
+    
+    // Detect platform
+    const platform = detectPlatform(url);
+    if (!platform) {
+        showConverterResult('error', 'Unsupported store. We support: Amazon, Flipkart, Myntra, Ajio, Nykaa, Meesho, Tata CLiQ');
+        return;
+    }
+    
+    // Show loading
+    convertBtn.disabled = true;
+    convertBtn.innerHTML = '<span class="loading-spinner"></span> Converting...';
+    convertResult.style.display = 'none';
+    
+    try {
+        const affiliateUrl = await getAffiliateLink(url, platform.name);
+        
+        if (affiliateUrl !== url) {
+            showConverterResult('success', affiliateUrl, platform);
+        } else {
+            showConverterResult('error', 'Could not convert URL. Please try again.');
+        }
+    } catch (error) {
+        showConverterResult('error', 'Conversion failed. Please try again.');
+    } finally {
+        convertBtn.disabled = false;
+        convertBtn.innerHTML = 'Convert to Affiliate Link 🔗';
+    }
+}
+
+function showConverterResult(type, message, platform = null) {
+    const convertResult = document.getElementById('convertResult');
+    if (!convertResult) return;
+    
+    convertResult.style.display = 'block';
+    
+    if (type === 'success') {
+        convertResult.innerHTML = `
+            <div class="convert-success">
+                <div class="platform-detected">
+                    <span>${platform.icon}</span>
+                    <span>${platform.name} detected</span>
+                </div>
+                <div class="affiliate-url-box">
+                    <input type="text" value="${message}" readonly id="affiliateOutput">
+                    <button onclick="copyAffiliateUrl()" class="copy-btn">📋 Copy</button>
+                </div>
+                <a href="${message}" target="_blank" class="open-link-btn">Open Link ↗️</a>
+            </div>
+        `;
+    } else {
+        convertResult.innerHTML = `
+            <div class="convert-error">
+                <span>❌</span>
+                <span>${message}</span>
+            </div>
+        `;
+    }
+}
+
+function copyAffiliateUrl() {
+    const output = document.getElementById('affiliateOutput');
+    if (output) {
+        navigator.clipboard.writeText(output.value).then(() => {
+            showSuccess('Affiliate link copied! 📋');
+        }).catch(() => {
+            output.select();
+            document.execCommand('copy');
+            showSuccess('Affiliate link copied! 📋');
+        });
+    }
+}
+
+// ===== Deal of the Day Functions =====
+let dealOfDayTimer = null;
+
+async function loadDealOfDay() {
+    const dealSection = document.getElementById('dealOfDay');
+    if (!dealSection) return;
+    
+    // Show only for logged-in users
+    if (!currentUser) {
+        dealSection.style.display = 'none';
+        return;
+    }
+    
+    dealSection.style.display = 'block';
+    
+    try {
+        const response = await fetch(`${API_BASE}/deals?limit=5&min_discount=60`);
+        if (!response.ok) throw new Error('Failed to fetch deals');
+        
+        const data = await response.json();
+        if (data.deals && data.deals.length > 0) {
+            // Pick a random hot deal
+            const randomDeal = data.deals[Math.floor(Math.random() * data.deals.length)];
+            displayDealOfDay(randomDeal);
+        }
+    } catch (error) {
+        console.log('Could not load deal of day:', error);
+        dealSection.style.display = 'none';
+    }
+}
+
+function displayDealOfDay(deal) {
+    const dealContent = document.getElementById('dealContent');
+    if (!dealContent) return;
+    
+    // Cache product for wishlist
+    productsCache[deal.id] = deal;
+    const isInWishlist = userWishlist.some(p => p.id === deal.id);
+    
+    dealContent.innerHTML = `
+        <div class="deal-card">
+            <div class="deal-image">
+                <img src="${deal.image}" alt="${escapeHtml(deal.title)}" onerror="this.src='https://via.placeholder.com/300x200?text=Deal'">
+                <span class="deal-badge">🔥 ${deal.discount}% OFF</span>
+            </div>
+            <div class="deal-info">
+                <span class="deal-platform platform-${deal.platform.toLowerCase()}">${deal.platform}</span>
+                <h3 class="deal-title">${escapeHtml(deal.title)}</h3>
+                <p class="deal-brand">${escapeHtml(deal.brand)}</p>
+                <div class="deal-price">
+                    <span class="current-price">₹${formatPrice(deal.price)}</span>
+                    <span class="original-price">₹${formatPrice(deal.original_price)}</span>
+                    <span class="savings">You save ₹${formatPrice(deal.original_price - deal.price)}</span>
+                </div>
+                <div class="deal-timer">
+                    <span>⏰ Ends in: </span>
+                    <span id="dealTimer">23:59:59</span>
+                </div>
+                <div class="deal-actions">
+                    <a href="${getAffiliateLinkSync(deal.affiliate_url, deal.platform)}" target="_blank" class="deal-buy-btn">
+                        Grab Deal 🛒
+                    </a>
+                    <button class="deal-wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="handleWishlistClick('${deal.id}')">
+                        ${isInWishlist ? '❤️' : '🤍'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Start countdown timer
+    startDealTimer();
+}
+
+function startDealTimer() {
+    if (dealOfDayTimer) clearInterval(dealOfDayTimer);
+    
+    // Set end time to midnight
+    const now = new Date();
+    const endTime = new Date(now);
+    endTime.setHours(23, 59, 59, 999);
+    
+    function updateTimer() {
+        const now = new Date();
+        const diff = endTime - now;
+        
+        if (diff <= 0) {
+            document.getElementById('dealTimer').textContent = 'Expired!';
+            loadDealOfDay(); // Load new deal
+            return;
+        }
+        
+        const hours = Math.floor(diff / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        
+        const timerEl = document.getElementById('dealTimer');
+        if (timerEl) {
+            timerEl.textContent = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    }
+    
+    updateTimer();
+    dealOfDayTimer = setInterval(updateTimer, 1000);
+}
+
+// ===== Mobile Menu Toggle =====
+function toggleMobileMenu() {
+    const navLinks = document.querySelector('.nav-links');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    
+    if (navLinks && mobileMenuBtn) {
+        navLinks.classList.toggle('active');
+        mobileMenuBtn.classList.toggle('active');
+    }
 }
 
 // ===== DOM Elements =====
@@ -606,6 +838,26 @@ async function loadTopDeals() {
 document.addEventListener("DOMContentLoaded", () => {
     loadTopDeals();
     
+    // URL Converter button
+    const convertBtn = document.getElementById('convertBtn');
+    if (convertBtn) {
+        convertBtn.addEventListener('click', convertUrl);
+    }
+    
+    // URL input enter key
+    const urlInput = document.getElementById('urlInput');
+    if (urlInput) {
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') convertUrl();
+        });
+    }
+    
+    // Mobile menu toggle
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    }
+    
     // Wishlist nav click
     document.getElementById('wishlistNav')?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -631,12 +883,69 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.auth) {
         window.auth.onAuthStateChanged((user) => {
             currentUser = user;
+            updateAuthUI(user);
             if (user) {
                 loadWishlist();
+                loadDealOfDay();
             } else {
                 userWishlist = [];
                 updateWishlistCount();
+                hideDealOfDay();
             }
         });
     }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
 });
+
+// Update Auth UI
+function updateAuthUI(user) {
+    const authBtn = document.getElementById('authBtn');
+    const userInfo = document.getElementById('userInfo');
+    const userName = document.getElementById('userName');
+    const wishlistNav = document.getElementById('wishlistNav');
+    const historyNav = document.getElementById('historyNav');
+    
+    if (user) {
+        if (authBtn) authBtn.style.display = 'none';
+        if (userInfo) {
+            userInfo.style.display = 'flex';
+            if (userName) userName.textContent = user.displayName || user.email?.split('@')[0] || 'User';
+        }
+        if (wishlistNav) wishlistNav.style.display = 'flex';
+        if (historyNav) historyNav.style.display = 'flex';
+    } else {
+        if (authBtn) authBtn.style.display = 'flex';
+        if (userInfo) userInfo.style.display = 'none';
+        if (wishlistNav) wishlistNav.style.display = 'none';
+        if (historyNav) historyNav.style.display = 'none';
+    }
+}
+
+// Hide deal of day for non-logged users
+function hideDealOfDay() {
+    const dealSection = document.getElementById('dealOfDay');
+    if (dealSection) dealSection.style.display = 'none';
+}
+
+// Logout function
+async function logout() {
+    if (window.auth) {
+        try {
+            await window.auth.signOut();
+            showSuccess('Logged out successfully!');
+            window.location.reload();
+        } catch (error) {
+            showError('Logout failed');
+        }
+    }
+}
