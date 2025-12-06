@@ -21,8 +21,8 @@
             </a>
             <nav class="nav-links">
                 <a href="#" class="nav-link active">🏷️ Deals</a>
-                <a href="#" class="nav-link">📦 Categories</a>
-                <a href="#" class="nav-link">ℹ️ About</a>
+                <a href="#" class="nav-link" id="wishlistNav">❤️ Wishlist <span class="wishlist-count" id="wishlistCount"></span></a>
+                <a href="#" class="nav-link" id="historyNav">🕐 History</a>
             </nav>
             <div class="header-right">
                 <div id="userSection">
@@ -228,6 +228,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script>
         // Firebase Configuration
@@ -243,6 +244,11 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Make db globally available for script.js
+        window.db = db;
+        window.auth = auth;
 
         // Check auth state and update header
         auth.onAuthStateChanged((user) => {
