@@ -11,17 +11,6 @@ const EARNKARO_CONFIG = {
 // Affiliate link cache to avoid repeated API calls
 const affiliateLinkCache = new Map();
 
-// Supported stores for URL converter
-const SUPPORTED_STORES = [
-    { name: 'Amazon', domain: 'amazon.in', icon: '🛒', color: '#ff9900' },
-    { name: 'Flipkart', domain: 'flipkart.com', icon: '🛍️', color: '#2874f0' },
-    { name: 'Myntra', domain: 'myntra.com', icon: '👗', color: '#ff3f6c' },
-    { name: 'Ajio', domain: 'ajio.com', icon: '👔', color: '#2874f0' },
-    { name: 'Nykaa', domain: 'nykaa.com', icon: '💄', color: '#fc2779' },
-    { name: 'Meesho', domain: 'meesho.com', icon: '🛒', color: '#570741' },
-    { name: 'Tata CLiQ', domain: 'tatacliq.com', icon: '🏷️', color: '#5c2d91' }
-];
-
 // Convert product URL to affiliate link using EarnKaro API
 async function getAffiliateLink(originalUrl, platform) {
     if (!EARNKARO_CONFIG.enabled) {
@@ -57,110 +46,6 @@ function getAffiliateLinkSync(originalUrl, platform) {
     // Schedule async conversion for next time
     getAffiliateLink(originalUrl, platform);
     return originalUrl;
-}
-
-// ===== URL Converter Functions =====
-function detectPlatform(url) {
-    const urlLower = url.toLowerCase();
-    for (const store of SUPPORTED_STORES) {
-        if (urlLower.includes(store.domain)) {
-            return store;
-        }
-    }
-    return null;
-}
-
-async function convertUrl() {
-    const urlInput = document.getElementById('urlInput');
-    const convertBtn = document.getElementById('convertBtn');
-    const convertResult = document.getElementById('convertResult');
-    
-    if (!urlInput || !convertBtn || !convertResult) return;
-    
-    const url = urlInput.value.trim();
-    
-    if (!url) {
-        showConverterResult('error', 'Please enter a product URL');
-        return;
-    }
-    
-    // Validate URL format
-    try {
-        new URL(url);
-    } catch {
-        showConverterResult('error', 'Please enter a valid URL');
-        return;
-    }
-    
-    // Detect platform
-    const platform = detectPlatform(url);
-    if (!platform) {
-        showConverterResult('error', 'Unsupported store. We support: Amazon, Flipkart, Myntra, Ajio, Nykaa, Meesho, Tata CLiQ');
-        return;
-    }
-    
-    // Show loading
-    convertBtn.disabled = true;
-    convertBtn.innerHTML = '<span class="loading-spinner"></span> Converting...';
-    convertResult.style.display = 'none';
-    
-    try {
-        const affiliateUrl = await getAffiliateLink(url, platform.name);
-        
-        if (affiliateUrl !== url) {
-            showConverterResult('success', affiliateUrl, platform);
-        } else {
-            showConverterResult('error', 'Could not convert URL. Please try again.');
-        }
-    } catch (error) {
-        showConverterResult('error', 'Conversion failed. Please try again.');
-    } finally {
-        convertBtn.disabled = false;
-        convertBtn.innerHTML = 'Convert to Affiliate Link 🔗';
-    }
-}
-
-function showConverterResult(type, message, platform = null) {
-    const convertResult = document.getElementById('convertResult');
-    if (!convertResult) return;
-    
-    convertResult.style.display = 'block';
-    
-    if (type === 'success') {
-        convertResult.innerHTML = `
-            <div class="convert-success">
-                <div class="platform-detected">
-                    <span>${platform.icon}</span>
-                    <span>${platform.name} detected</span>
-                </div>
-                <div class="affiliate-url-box">
-                    <input type="text" value="${message}" readonly id="affiliateOutput">
-                    <button onclick="copyAffiliateUrl()" class="copy-btn">📋 Copy</button>
-                </div>
-                <a href="${message}" target="_blank" class="open-link-btn">Open Link ↗️</a>
-            </div>
-        `;
-    } else {
-        convertResult.innerHTML = `
-            <div class="convert-error">
-                <span>❌</span>
-                <span>${message}</span>
-            </div>
-        `;
-    }
-}
-
-function copyAffiliateUrl() {
-    const output = document.getElementById('affiliateOutput');
-    if (output) {
-        navigator.clipboard.writeText(output.value).then(() => {
-            showSuccess('Affiliate link copied! 📋');
-        }).catch(() => {
-            output.select();
-            document.execCommand('copy');
-            showSuccess('Affiliate link copied! 📋');
-        });
-    }
 }
 
 // ===== Deal of the Day Functions =====
@@ -838,25 +723,89 @@ async function loadTopDeals() {
 document.addEventListener("DOMContentLoaded", () => {
     loadTopDeals();
     
-    // URL Converter button
-    const convertBtn = document.getElementById('convertBtn');
-    if (convertBtn) {
-        convertBtn.addEventListener('click', convertUrl);
+    // Hero Search functionality
+    const heroSearchBtn = document.getElementById('heroSearchBtn');
+    const heroSearch = document.getElementById('heroSearch');
+    
+    if (heroSearchBtn) {
+        heroSearchBtn.addEventListener('click', () => {
+            const query = heroSearch?.value.trim() || '';
+            const searchQuery = document.getElementById('searchQuery');
+            if (searchQuery) searchQuery.value = query;
+            searchProducts();
+            // Scroll to results
+            document.querySelector('.filters-section')?.scrollIntoView({ behavior: 'smooth' });
+        });
     }
     
-    // URL input enter key
-    const urlInput = document.getElementById('urlInput');
-    if (urlInput) {
-        urlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') convertUrl();
+    if (heroSearch) {
+        heroSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = heroSearch.value.trim();
+                const searchQuery = document.getElementById('searchQuery');
+                if (searchQuery) searchQuery.value = query;
+                searchProducts();
+                document.querySelector('.filters-section')?.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+    
+    // Explore button
+    const exploreBtn = document.getElementById('exploreBtn');
+    if (exploreBtn) {
+        exploreBtn.addEventListener('click', () => {
+            searchProducts();
+        });
+    }
+    
+    // Filters toggle
+    const filtersToggle = document.getElementById('filtersToggle');
+    const filtersGrid = document.getElementById('filtersGrid');
+    if (filtersToggle && filtersGrid) {
+        filtersToggle.addEventListener('click', () => {
+            filtersGrid.classList.toggle('active');
+            filtersToggle.classList.toggle('active');
+            const text = filtersToggle.querySelector('span');
+            if (text) {
+                text.textContent = filtersGrid.classList.contains('active') ? 'Hide Filters' : 'Show Filters';
+            }
         });
     }
     
     // Mobile menu toggle
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileNav = document.getElementById('mobileNav');
     if (mobileMenuBtn) {
-        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            if (mobileNav) mobileNav.classList.toggle('active');
+        });
     }
+    
+    // Mobile nav links
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nav = link.dataset.nav;
+            document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            
+            if (nav === 'wishlist') {
+                setActiveNav('wishlist');
+                displayWishlist();
+            } else if (nav === 'history') {
+                setActiveNav('history');
+                displaySearchHistory();
+            } else {
+                setActiveNav('deals');
+                loadTopDeals();
+            }
+            
+            // Close mobile menu
+            if (mobileMenuBtn) mobileMenuBtn.classList.remove('active');
+            if (mobileNav) mobileNav.classList.remove('active');
+        });
+    });
     
     // Wishlist nav click
     document.getElementById('wishlistNav')?.addEventListener('click', (e) => {
@@ -872,8 +821,8 @@ document.addEventListener("DOMContentLoaded", () => {
         displaySearchHistory();
     });
     
-    // Deals nav click (first nav link)
-    document.querySelector('.nav-link')?.addEventListener('click', (e) => {
+    // Deals nav click
+    document.getElementById('dealsNav')?.addEventListener('click', (e) => {
         e.preventDefault();
         setActiveNav('deals');
         loadTopDeals();
