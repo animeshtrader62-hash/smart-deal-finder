@@ -515,13 +515,10 @@ function clearFilters() {
 
 // ===== Load Top Deals =====
 async function loadTopDeals() {
-    console.log("Loading top deals...");
     try {
         const response = await fetch(`${API_BASE}/deals?limit=8`);
-        console.log("Response status:", response.status);
         if (response.ok) {
             const data = await response.json();
-            console.log("Deals data:", data);
             if (data.deals && data.deals.length > 0) {
                 initialState.style.display = "none";
                 resultsHeader.style.display = "block";
@@ -529,13 +526,10 @@ async function loadTopDeals() {
                 productsGrid.innerHTML = data.deals.map(product => createProductCard(product)).join("");
             }
         } else {
-            console.error("API error:", response.status);
-            // Show initial state if API fails
             initialState.style.display = "block";
         }
     } catch (error) {
         console.error("Could not load top deals:", error);
-        // Show initial state on error
         initialState.style.display = "block";
     }
 }
