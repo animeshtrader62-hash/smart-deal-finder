@@ -6,6 +6,12 @@ function getProductUrl(originalUrl) {
     return originalUrl;
 }
 
+// ===== Prevent duplicate API calls =====
+let isLoadingDeals = false;
+let isLoadingDealOfDay = false;
+let dealsLoaded = false;
+let dealOfDayLoaded = false;
+
 // ===== Deal of the Day Functions =====
 let dealOfDayTimer = null;
 
@@ -13,12 +19,16 @@ async function loadDealOfDay() {
     const dealSection = document.getElementById('dealOfDay');
     if (!dealSection) return;
     
+    // Prevent duplicate calls
+    if (isLoadingDealOfDay || dealOfDayLoaded) return;
+    
     // Show only for logged-in users
     if (!currentUser) {
         dealSection.style.display = 'none';
         return;
     }
     
+    isLoadingDealOfDay = true;
     dealSection.style.display = 'block';
     
     try {
@@ -30,10 +40,13 @@ async function loadDealOfDay() {
             // Pick a random hot deal
             const randomDeal = data.deals[Math.floor(Math.random() * data.deals.length)];
             displayDealOfDay(randomDeal);
+            dealOfDayLoaded = true;
         }
     } catch (error) {
         console.log('Could not load deal of day:', error);
         dealSection.style.display = 'none';
+    } finally {
+        isLoadingDealOfDay = false;
     }
 }
 
@@ -93,8 +106,9 @@ function startDealTimer() {
         const diff = endTime - now;
         
         if (diff <= 0) {
-            document.getElementById('dealTimer').textContent = 'Expired!';
-            loadDealOfDay(); // Load new deal
+            const timerEl = document.getElementById('dealTimer');
+            if (timerEl) timerEl.textContent = 'Deal Ended!';
+            clearInterval(dealOfDayTimer); // Stop timer, don't reload
             return;
         }
         
@@ -637,6 +651,11 @@ function clearFilters() {
 
 // ===== Load Top Deals =====
 async function loadTopDeals() {
+    // Prevent duplicate calls
+    if (isLoadingDeals) return;
+    
+    isLoadingDeals = true;
+    
     try {
         const response = await fetch(`${API_BASE}/deals?limit=8`);
         if (response.ok) {
@@ -646,6 +665,7 @@ async function loadTopDeals() {
                 resultsHeader.style.display = "block";
                 resultsCount.textContent = "🔥 Top Deals for You";
                 productsGrid.innerHTML = data.deals.map(product => createProductCard(product)).join("");
+                dealsLoaded = true;
             }
         } else {
             initialState.style.display = "block";
@@ -653,6 +673,8 @@ async function loadTopDeals() {
     } catch (error) {
         console.error("Could not load top deals:", error);
         initialState.style.display = "block";
+    } finally {
+        isLoadingDeals = false;
     }
 }
 
@@ -765,9 +787,15 @@ document.addEventListener("DOMContentLoaded", () => {
         loadTopDeals();
     });
     
-    // Auth state listener
+    // Auth state listener - only fires once per state change
+    let lastAuthState = null;
     if (window.auth) {
         window.auth.onAuthStateChanged((user) => {
+            // Prevent duplicate handling
+            const currentState = user ? user.uid : null;
+            if (currentState === lastAuthState) return;
+            lastAuthState = currentState;
+            
             currentUser = user;
             updateAuthUI(user);
             if (user) {
@@ -777,6 +805,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 userWishlist = [];
                 updateWishlistCount();
                 hideDealOfDay();
+                // Reset loaded flags on logout
+                dealOfDayLoaded = false;
             }
         });
     }
