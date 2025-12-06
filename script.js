@@ -1,6 +1,36 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
+// ===== ExtraPe Affiliate Configuration =====
+const EXTRAPE_CONFIG = {
+    enabled: true,
+    affiliate_id: 'EPTG2069282',
+    tracking_code: '1009',
+    flipkart_affid: 'bh7162'
+};
+
+// Convert product URL to ExtraPe affiliate link
+function getAffiliateLink(originalUrl, platform) {
+    if (!EXTRAPE_CONFIG.enabled) {
+        return originalUrl;
+    }
+    
+    // ExtraPe format for Flipkart
+    if (platform && platform.toLowerCase() === 'flipkart') {
+        const encodedUrl = encodeURIComponent(originalUrl);
+        return `https://extrape.com/aff/${EXTRAPE_CONFIG.affiliate_id}?url=${encodedUrl}`;
+    }
+    
+    // ExtraPe format for Myntra
+    if (platform && platform.toLowerCase() === 'myntra') {
+        const encodedUrl = encodeURIComponent(originalUrl);
+        return `https://extrape.com/aff/${EXTRAPE_CONFIG.affiliate_id}?url=${encodedUrl}`;
+    }
+    
+    // For Amazon or others, return original (add EarnKaro later if needed)
+    return originalUrl;
+}
+
 // ===== DOM Elements =====
 const searchBtn = document.getElementById("searchBtn");
 const clearBtn = document.getElementById("clearBtn");
@@ -406,7 +436,7 @@ function createProductCard(product) {
                     <span class="rating-badge">${product.rating || 4.0} ★</span>
                     <span class="rating-count">(${formatCount(product.reviews || 100)} reviews)</span>
                 </div>
-                <a href="${product.affiliate_url}" target="_blank" rel="noopener noreferrer" class="buy-btn">
+                <a href="${getAffiliateLink(product.affiliate_url, product.platform)}" target="_blank" rel="noopener noreferrer" class="buy-btn">
                     Buy Now 🛒
                 </a>
             </div>
