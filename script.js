@@ -76,6 +76,7 @@ async function addToWishlist(product) {
         }, { merge: true });
         
         updateWishlistCount();
+        updateHeartIcon(product.id, true);
         showSuccess("Added to wishlist! ❤️");
     } catch (error) {
         console.error("Wishlist error:", error);
@@ -95,6 +96,7 @@ async function removeFromWishlist(productId) {
         }, { merge: true });
         
         updateWishlistCount();
+        updateHeartIcon(productId, false);
         showSuccess("Removed from wishlist");
         
         // Refresh if viewing wishlist
@@ -114,14 +116,21 @@ function toggleWishlist(product) {
     } else {
         addToWishlist(product);
     }
-    
-    // Update heart icon
-    const card = document.querySelector(`[data-product-id="${product.id}"]`);
+}
+
+// Update heart icon on product card
+function updateHeartIcon(productId, isActive) {
+    const card = document.querySelector(`[data-product-id="${productId}"]`);
     if (card) {
         const btn = card.querySelector('.wishlist-btn');
         if (btn) {
-            btn.classList.toggle('active');
-            btn.innerHTML = btn.classList.contains('active') ? '❤️' : '🤍';
+            if (isActive) {
+                btn.classList.add('active');
+                btn.innerHTML = '❤️';
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '🤍';
+            }
         }
     }
 }
@@ -144,6 +153,9 @@ function displayWishlist() {
         showError("Please login to view wishlist");
         return;
     }
+    
+    // Re-cache wishlist products for heart icon toggle
+    userWishlist.forEach(p => { productsCache[p.id] = p; });
     
     if (userWishlist.length === 0) {
         productsGrid.innerHTML = "";
