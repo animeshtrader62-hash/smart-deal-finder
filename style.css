@@ -168,7 +168,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .store-logo:hover { transform: scale(1.1); }
 .store-logo.flipkart { background: var(--flipkart); }
 .store-logo.myntra { background: var(--myntra); }
-.store-logo.amazon { background: var(--amazon); }
+.store-logo.ajio { background: #d5a249; }
 
 /* Quick Filters */
 .quick-filters { max-width: 1400px; margin: 0 auto 30px; padding: 0 20px; position: relative; z-index: 1; }
@@ -183,7 +183,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .platform-dot { width: 10px; height: 10px; border-radius: 50%; }
 .platform-dot.flipkart { background: var(--flipkart); }
 .platform-dot.myntra { background: var(--myntra); }
-.platform-dot.amazon { background: var(--amazon); }
+.platform-dot.ajio { background: #d5a249; }
 
 /* Filters Section */
 .filters-section { max-width: 1400px; margin: 0 auto 30px; padding: 0 20px; position: relative; z-index: 1; }
@@ -272,7 +272,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .product-platform { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 5px 12px; border-radius: var(--radius-full); margin-bottom: 12px; width: fit-content; }
 .platform-flipkart { background: rgba(40, 116, 240, 0.1); color: var(--flipkart); }
 .platform-myntra { background: rgba(255, 63, 108, 0.1); color: var(--myntra); }
-.platform-amazon { background: rgba(255, 153, 0, 0.1); color: var(--amazon); }
+.platform-ajio { background: rgba(213, 162, 73, 0.1); color: #d5a249; }
 .product-brand { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .product-title { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 14px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .product-price-section { margin-bottom: 14px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }

@@ -440,6 +440,58 @@ document.querySelectorAll(".filter-group input").forEach(input => {
     });
 });
 
+// ===== Intelligent Brand Filtering =====
+// Brand options based on category
+const brandsByCategory = {
+    "Smartphones": ["All Brands", "Samsung", "Realme", "Xiaomi", "OnePlus", "Vivo", "Apple", "Oppo", "Motorola", "iQOO", "Poco"],
+    "Laptops": ["All Brands", "HP", "Lenovo", "Dell", "Asus", "Acer", "Apple", "MSI"],
+    "Earphones": ["All Brands", "boAt", "JBL", "Noise", "Sony", "Realme", "OnePlus", "Samsung"],
+    "Shoes": ["All Brands", "Puma", "Nike", "Adidas", "Reebok", "Campus", "Sparx", "Bata"],
+    "Watches": ["All Brands", "Noise", "boAt", "Fire-Boltt", "Fastrack", "Titan", "Fossil"],
+    "Clothing": ["All Brands", "Roadster", "H&M", "Allen Solly", "Van Heusen", "Peter England", "Wrogn", "Mast & Harbour"]
+};
+
+// Update brand dropdown when category changes
+function updateBrandDropdown(category) {
+    const brandSelect = document.getElementById('brand');
+    if (!brandSelect) return;
+    
+    // Clear existing options
+    brandSelect.innerHTML = '<option value="">All Brands</option>';
+    
+    if (category && brandsByCategory[category]) {
+        brandsByCategory[category].forEach(brand => {
+            if (brand !== "All Brands") {
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                brandSelect.appendChild(option);
+            }
+        });
+    } else {
+        // If no category selected, show all brands
+        const allBrands = new Set();
+        Object.values(brandsByCategory).forEach(brands => {
+            brands.forEach(brand => {
+                if (brand !== "All Brands") allBrands.add(brand);
+            });
+        });
+        Array.from(allBrands).sort().forEach(brand => {
+            const option = document.createElement('option');
+            option.value = brand;
+            option.textContent = brand;
+            brandSelect.appendChild(option);
+        });
+    }
+}
+
+// Listen to category changes
+if (categoryInput) {
+    categoryInput.addEventListener('change', () => {
+        updateBrandDropdown(categoryInput.value);
+    });
+}
+
 // ===== Main Search Function =====
 async function searchProducts() {
     showLoading();
@@ -680,6 +732,9 @@ async function loadTopDeals() {
 
 // ===== Initialize =====
 document.addEventListener("DOMContentLoaded", () => {
+    // Initialize brand dropdown with all brands
+    updateBrandDropdown('');
+    
     loadTopDeals();
     
     // Hero Search functionality
