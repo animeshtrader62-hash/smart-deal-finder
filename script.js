@@ -1,47 +1,51 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
-// ===== ExtraPe Affiliate Configuration =====
-// How it works: ExtraPe URL Replacer tracks URLs containing your affiliate ID
-// When user visits Flipkart with affid=bh7162, ExtraPe tracks the sale
-const EXTRAPE_CONFIG = {
+// ===== EarnKaro Affiliate Configuration =====
+// Uses EarnKaro API to convert any URL to affiliate link
+const EARNKARO_CONFIG = {
     enabled: true,
-    affiliate_id: 'EPTG2069282',      // Your ExtraPe ID
-    tracking_code: '1009',             // Your tracking code
-    flipkart_affid: 'bh7162'           // Your Flipkart affiliate ID
+    api_endpoint: `${API_BASE}/convert`  // Backend handles API call
 };
 
-// Convert product URL to affiliate link by adding tracking parameters
-function getAffiliateLink(originalUrl, platform) {
-    if (!EXTRAPE_CONFIG.enabled) {
+// Affiliate link cache to avoid repeated API calls
+const affiliateLinkCache = new Map();
+
+// Convert product URL to affiliate link using EarnKaro API
+async function getAffiliateLink(originalUrl, platform) {
+    if (!EARNKARO_CONFIG.enabled) {
         return originalUrl;
     }
     
+    // Check cache first
+    if (affiliateLinkCache.has(originalUrl)) {
+        return affiliateLinkCache.get(originalUrl);
+    }
+    
     try {
-        const url = new URL(originalUrl);
+        // Call backend which calls EarnKaro API
+        const response = await fetch(`${EARNKARO_CONFIG.api_endpoint}?url=${encodeURIComponent(originalUrl)}`);
+        const data = await response.json();
         
-        // For Flipkart - add affiliate tracking parameters
-        if (platform && platform.toLowerCase() === 'flipkart') {
-            url.searchParams.set('affid', EXTRAPE_CONFIG.flipkart_affid);
-            url.searchParams.set('affExtParam1', EXTRAPE_CONFIG.affiliate_id);
-            url.searchParams.set('affExtParam2', EXTRAPE_CONFIG.tracking_code);
-            return url.toString();
+        if (data.success && data.affiliate_url) {
+            affiliateLinkCache.set(originalUrl, data.affiliate_url);
+            return data.affiliate_url;
         }
-        
-        // For Myntra - add tracking parameters
-        if (platform && platform.toLowerCase() === 'myntra') {
-            url.searchParams.set('utm_source', 'affiliate');
-            url.searchParams.set('utm_medium', EXTRAPE_CONFIG.affiliate_id);
-            url.searchParams.set('utm_campaign', EXTRAPE_CONFIG.tracking_code);
-            return url.toString();
-        }
-        
-        // For Amazon or others, return original
         return originalUrl;
     } catch (e) {
-        // If URL parsing fails, return original
+        console.log("Affiliate conversion error:", e);
         return originalUrl;
     }
+}
+
+// Sync version for immediate use (uses cache or returns original)
+function getAffiliateLinkSync(originalUrl, platform) {
+    if (affiliateLinkCache.has(originalUrl)) {
+        return affiliateLinkCache.get(originalUrl);
+    }
+    // Schedule async conversion for next time
+    getAffiliateLink(originalUrl, platform);
+    return originalUrl;
 }
 
 // ===== DOM Elements =====
@@ -408,6 +412,27 @@ function displayProducts(data) {
     resultsHeader.style.display = "block";
     resultsCount.textContent = `Found ${data.count} products`;
     productsGrid.innerHTML = data.products.map(product => createProductCard(product)).join("");
+    
+    // Pre-convert affiliate links in background
+    preConvertAffiliateLinks(data.products);
+}
+
+// Pre-convert affiliate links for all products
+async function preConvertAffiliateLinks(products) {
+    for (const product of products) {
+        if (!affiliateLinkCache.has(product.affiliate_url)) {
+            try {
+                const affiliateUrl = await getAffiliateLink(product.affiliate_url, product.platform);
+                // Update the button href
+                const btn = document.querySelector(`[data-original-url="${product.affiliate_url}"]`);
+                if (btn) {
+                    btn.href = affiliateUrl;
+                }
+            } catch (e) {
+                console.log("Pre-convert error:", e);
+            }
+        }
+    }
 }
 
 // ===== Create Product Card =====
@@ -449,7 +474,7 @@ function createProductCard(product) {
                     <span class="rating-badge">${product.rating || 4.0} ★</span>
                     <span class="rating-count">(${formatCount(product.reviews || 100)} reviews)</span>
                 </div>
-                <a href="${getAffiliateLink(product.affiliate_url, product.platform)}" target="_blank" rel="noopener noreferrer" class="buy-btn">
+                <a href="${getAffiliateLinkSync(product.affiliate_url, product.platform)}" target="_blank" rel="noopener noreferrer" class="buy-btn" data-original-url="${product.affiliate_url}" data-platform="${product.platform}">
                     Buy Now 🛒
                 </a>
             </div>
