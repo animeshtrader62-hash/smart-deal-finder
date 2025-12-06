@@ -364,15 +364,15 @@ function createProductCard(product) {
     const isInWishlist = userWishlist.some(p => p.id === product.id);
     const wishlistBtnClass = isInWishlist ? 'wishlist-btn active' : 'wishlist-btn';
     const wishlistIcon = isInWishlist ? '❤️' : '🤍';
-    
-    const productJson = JSON.stringify(product).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
     return `
         <div class="product-card" data-product-id="${product.id}">
             <div class="product-image-container">
                 <img src="${product.image}" alt="${product.title}" class="product-image"
                     onerror="this.src='${fallbackImage}'" loading="lazy">
-                <button class="${wishlistBtnClass}" onclick='toggleWishlist(${productJson})' 
+                <button class="${wishlistBtnClass}" 
+                    data-product='${encodeURIComponent(JSON.stringify(product))}'
+                    onclick="handleWishlistClick(this)"
                     title="${isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}">
                     ${wishlistIcon}
                 </button>
@@ -397,6 +397,18 @@ function createProductCard(product) {
             </div>
         </div>
     `;
+}
+
+// Handle wishlist click
+function handleWishlistClick(btn) {
+    try {
+        const productData = decodeURIComponent(btn.dataset.product);
+        const product = JSON.parse(productData);
+        toggleWishlist(product);
+    } catch (error) {
+        console.error("Wishlist click error:", error);
+        showError("Something went wrong");
+    }
 }
 
 // ===== Helper Functions =====
