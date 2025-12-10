@@ -340,7 +340,14 @@ async function showResult() {
     const cat = CATEGORIES[wizardState.category];
     const store = cat.store;
     
-    // Generate the link via API
+    // Show loading state
+    document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('wizardResult').classList.add('active');
+    
+    const summary = document.getElementById('resultSummary');
+    summary.innerHTML = '<p style="text-align:center;">⏳ Generating your personalized link...</p>';
+    
+    // Generate the link via API (with fallback)
     const link = await generateDirectLink(store, cat.search, {
         brand: wizardState.brandName,
         price_min: wizardState.priceMin,
@@ -348,17 +355,14 @@ async function showResult() {
         discount: wizardState.discount
     });
     
-    if (link) {
-        wizardState.generatedUrl = link;
-    } else {
-        // Fallback URL
-        wizardState.generatedUrl = store === 'flipkart' 
-            ? `https://www.flipkart.com/search?q=${encodeURIComponent(cat.search)}`
-            : `https://www.myntra.com/${cat.search}`;
-    }
+    wizardState.generatedUrl = link || generateFallbackUrl(store, cat.search, {
+        brand: wizardState.brandName,
+        price_min: wizardState.priceMin,
+        price_max: wizardState.priceMax,
+        discount: wizardState.discount
+    });
     
     // Build summary
-    const summary = document.getElementById('resultSummary');
     let html = `<p><span>📦 Category:</span> ${cat.name}</p>`;
     if (wizardState.brandName) {
         html += `<p><span>🏷️ Brand:</span> ${wizardState.brandName}</p>`;
@@ -376,10 +380,6 @@ async function showResult() {
     document.getElementById('shopNowBtn').href = wizardState.generatedUrl;
     document.getElementById('shopNowIcon').textContent = STORE_ICONS[store] || '🛒';
     document.getElementById('shopNowStore').textContent = store.charAt(0).toUpperCase() + store.slice(1);
-    
-    // Hide all steps, show result
-    document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
-    document.getElementById('wizardResult').classList.add('active');
     
     // Update progress to completed
     document.querySelectorAll('.progress-step').forEach(s => s.classList.add('completed'));
@@ -432,17 +432,55 @@ async function generateDirectLink(store, query, filters = {}) {
             color: filters.color || ''
         });
         
-        const response = await fetch(`${API_BASE}/generate-link?${params.toString()}`);
-        if (!response.ok) throw new Error('Failed to generate link');
+        const response = await fetch(`${API_BASE}/generate-link?${params.toString()}`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!response.ok) throw new Error('API request failed');
         
         const data = await response.json();
-        if (data.success) {
+        if (data.success && data.affiliate_url) {
             return data.affiliate_url;
+        }
+        // If API returns success but no affiliate URL, use original
+        if (data.original_url) {
+            return data.original_url;
         }
         return null;
     } catch (error) {
         console.error('Link generation error:', error);
-        return null;
+        // Fallback: Generate URL locally
+        return generateFallbackUrl(store, query, filters);
+    }
+}
+
+// Fallback URL generation when API fails
+function generateFallbackUrl(store, query, filters = {}) {
+    const { brand, price_min, price_max, discount } = filters;
+    
+    if (store === 'myntra') {
+        let url = `https://www.myntra.com/${query.replace(/ /g, '-')}`;
+        const params = [];
+        if (brand) params.push(`f=Brand%3A${encodeURIComponent(brand)}`);
+        if (price_max < 999999) params.push(`price=${price_min || 0}%2C${price_max}`);
+        if (discount) params.push(`discount=${discount}%3A100`);
+        params.push('sort=popularity');
+        if (params.length) url += '?' + params.join('&');
+        return url;
+    } else {
+        // Flipkart
+        let searchTerms = brand ? `${brand} ${query}` : query;
+        let url = `https://www.flipkart.com/search?q=${encodeURIComponent(searchTerms)}`;
+        if (price_max < 999999) {
+            url += `&p%5B%5D=facets.price_range.from%3D${price_min || 0}`;
+            url += `&p%5B%5D=facets.price_range.to%3D${price_max}`;
+        }
+        if (discount) {
+            url += `&p%5B%5D=facets.discount_range%5B%5D%3D${discount}%25+or+more`;
+        }
+        url += '&sort=popularity';
+        return url;
     }
 }
 
