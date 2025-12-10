@@ -1556,6 +1556,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+    // Hero Search functionality (declared early for suggestions)
+    const heroSearchBtn = document.getElementById('heroSearchBtn');
+    const heroSearch = document.getElementById('heroSearch');
+    
         if (heroSearch) {
             heroSearch.addEventListener('input', (e) => {
                 const val = heroSearch.value.trim();
@@ -1584,10 +1588,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateBrandDropdown('');
     
     loadTopDeals();
-    
-    // Hero Search functionality
-    const heroSearchBtn = document.getElementById('heroSearchBtn');
-    const heroSearch = document.getElementById('heroSearch');
     
     if (heroSearchBtn) {
         heroSearchBtn.addEventListener('click', async () => {
