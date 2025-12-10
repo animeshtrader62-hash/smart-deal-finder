@@ -1,7 +1,34 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
-// Direct product links - no conversion needed for customer shopping
+// Generate direct store link with filters (same as bot)
+async function generateDirectLink(store, query, filters = {}) {
+    try {
+        const params = new URLSearchParams({
+            store: store,
+            query: query,
+            brand: filters.brand || '',
+            price_min: filters.price_min || 0,
+            price_max: filters.price_max || 999999,
+            discount: filters.discount || 0,
+            color: filters.color || ''
+        });
+        
+        const response = await fetch(`${API_BASE}/generate-link?${params.toString()}`);
+        if (!response.ok) throw new Error('Failed to generate link');
+        
+        const data = await response.json();
+        if (data.success) {
+            return data.affiliate_url;
+        }
+        return null;
+    } catch (error) {
+        console.error('Link generation error:', error);
+        return null;
+    }
+}
+
+// Direct product links - use affiliate URL from product data
 function getProductUrl(originalUrl) {
     return originalUrl;
 }
@@ -62,27 +89,27 @@ function displayDealOfDay(deal) {
         <div class="deal-card">
             <div class="deal-image">
                 <img src="${deal.image}" alt="${escapeHtml(deal.title)}" onerror="this.src='https://via.placeholder.com/300x200?text=Deal'">
-                <span class="deal-badge">🔥 ${deal.discount}% OFF</span>
+                <span class="deal-badge">ðŸ”¥ ${deal.discount}% OFF</span>
             </div>
             <div class="deal-info">
                 <span class="deal-platform platform-${deal.platform.toLowerCase()}">${deal.platform}</span>
                 <h3 class="deal-title">${escapeHtml(deal.title)}</h3>
                 <p class="deal-brand">${escapeHtml(deal.brand)}</p>
                 <div class="deal-price">
-                    <span class="current-price">₹${formatPrice(deal.price)}</span>
-                    <span class="original-price">₹${formatPrice(deal.original_price)}</span>
-                    <span class="savings">You save ₹${formatPrice(deal.original_price - deal.price)}</span>
+                    <span class="current-price">â‚¹${formatPrice(deal.price)}</span>
+                    <span class="original-price">â‚¹${formatPrice(deal.original_price)}</span>
+                    <span class="savings">You save â‚¹${formatPrice(deal.original_price - deal.price)}</span>
                 </div>
                 <div class="deal-timer">
-                    <span>⏰ Ends in: </span>
+                    <span>â° Ends in: </span>
                     <span id="dealTimer">23:59:59</span>
                 </div>
                 <div class="deal-actions">
                     <a href="${getProductUrl(deal.affiliate_url)}" target="_blank" class="deal-buy-btn">
-                        Grab Deal 🛒
+                        Grab Deal ðŸ›’
                     </a>
                     <button class="deal-wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="handleWishlistClick('${deal.id}')">
-                        ${isInWishlist ? '❤️' : '🤍'}
+                        ${isInWishlist ? 'â¤ï¸' : 'ðŸ¤'}
                     </button>
                 </div>
             </div>
@@ -213,7 +240,7 @@ async function addToWishlist(product) {
         
         updateWishlistCount();
         updateHeartIcon(product.id, true);
-        showSuccess("Added to wishlist! ❤️");
+        showSuccess("Added to wishlist! â¤ï¸");
     } catch (error) {
         console.error("Wishlist error:", error);
         showError("Failed to add to wishlist");
@@ -262,10 +289,10 @@ function updateHeartIcon(productId, isActive) {
         if (btn) {
             if (isActive) {
                 btn.classList.add('active');
-                btn.innerHTML = '❤️';
+                btn.innerHTML = 'â¤ï¸';
             } else {
                 btn.classList.remove('active');
-                btn.innerHTML = '🤍';
+                btn.innerHTML = 'ðŸ¤';
             }
         }
     }
@@ -296,10 +323,10 @@ function displayWishlist() {
     if (userWishlist.length === 0) {
         productsGrid.innerHTML = "";
         resultsHeader.style.display = "block";
-        resultsCount.textContent = "❤️ Your Wishlist";
+        resultsCount.textContent = "â¤ï¸ Your Wishlist";
         noResults.style.display = "block";
         noResults.innerHTML = `
-            <div class="no-results-icon">❤️</div>
+            <div class="no-results-icon">â¤ï¸</div>
             <h3>Wishlist is empty</h3>
             <p>Click the heart icon on products to save them here</p>
         `;
@@ -307,7 +334,7 @@ function displayWishlist() {
     }
     
     resultsHeader.style.display = "block";
-    resultsCount.textContent = `❤️ Your Wishlist (${userWishlist.length} items)`;
+    resultsCount.textContent = `â¤ï¸ Your Wishlist (${userWishlist.length} items)`;
     productsGrid.innerHTML = userWishlist.map(product => createProductCard(product)).join("");
 }
 
@@ -353,12 +380,12 @@ async function displaySearchHistory() {
         const history = doc.exists && doc.data().searchHistory ? doc.data().searchHistory : [];
         
         resultsHeader.style.display = "block";
-        resultsCount.textContent = "🕐 Recent Searches";
+        resultsCount.textContent = "ðŸ• Recent Searches";
         
         if (history.length === 0) {
             noResults.style.display = "block";
             noResults.innerHTML = `
-                <div class="no-results-icon">🕐</div>
+                <div class="no-results-icon">ðŸ•</div>
                 <h3>No search history</h3>
                 <p>Your recent searches will appear here</p>
             `;
@@ -369,7 +396,7 @@ async function displaySearchHistory() {
             <div class="history-list">
                 ${history.map((item, index) => `
                     <div class="history-item" onclick="replaySearch(${index})">
-                        <span class="history-icon">🔍</span>
+                        <span class="history-icon">ðŸ”</span>
                         <div class="history-details">
                             <span class="history-query">${item.query || 'All Products'}</span>
                             <span class="history-filters">
@@ -415,7 +442,7 @@ searchBtn.addEventListener("click", searchProducts);
 clearBtn.addEventListener("click", clearFilters);
 
 quickBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
         const filterType = btn.dataset.filter;
         const filterValue = btn.dataset.value;
         
@@ -430,6 +457,30 @@ quickBtns.forEach(btn => {
         }
         
         setActiveNav('deals');
+        
+        // For quick buttons with specific filters, offer direct link
+        if (btn.classList.contains("active") && filterType === "discount" && filterValue >= 50) {
+            // Show direct link for hot deals
+            const store = platformInput.value || 'Flipkart';
+            const query = categoryInput.value || 'all';
+            
+            showSuccess(`ðŸ”¥ Generating ${filterValue}%+ off deals...`);
+            
+            const link = await generateDirectLink(store.toLowerCase(), query, {
+                discount: parseInt(filterValue)
+            });
+            
+            if (link) {
+                // Ask user if they want direct link or search results
+                const useDirectLink = confirm(`Found ${filterValue}%+ off deals!\n\nClick OK to browse directly on ${store}, or Cancel to see results here.`);
+                if (useDirectLink) {
+                    window.open(link, '_blank');
+                    btn.classList.remove("active");
+                    return;
+                }
+            }
+        }
+        
         searchProducts();
     });
 });
@@ -524,11 +575,93 @@ async function searchProducts() {
         const response = await fetch(`${API_BASE}/search?${params.toString()}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        displayProducts(data);
+        
+        // If filters are applied, also show direct link option
+        if (data.count > 0 && (platform || category) && searchQuery) {
+            displayProductsWithDirectLink(data, {
+                platform: platform || 'Flipkart',
+                query: searchQuery,
+                category: category,
+                brand: brand,
+                price_min: parseInt(minPrice) || 0,
+                price_max: parseInt(maxPrice) || 999999,
+                discount: parseInt(minDiscount) || 0
+            });
+        } else {
+            displayProducts(data);
+        }
     } catch (error) {
         console.error("Search error:", error);
         showError("Failed to fetch products. Please try again.");
         hideLoading();
+    }
+}
+
+// ===== Display Products with Direct Link Option =====
+function displayProductsWithDirectLink(data, filters) {
+    hideLoading();
+    initialState.style.display = "none";
+
+    if (data.count === 0) {
+        productsGrid.innerHTML = "";
+        resultsHeader.style.display = "none";
+        noResults.style.display = "block";
+        noResults.innerHTML = `
+            <div class="no-results-icon">ðŸ˜•</div>
+            <h3>No products found</h3>
+            <p>Try adjusting your filters or search for something else</p>
+        `;
+        return;
+    }
+
+    noResults.style.display = "none";
+    resultsHeader.style.display = "block";
+    
+    // Add direct link button above results
+    const directLinkHtml = `
+        <div class="direct-link-banner glass" style="margin-bottom: 20px; padding: 15px; border-radius: 12px; text-align: center;">
+            <p style="margin-bottom: 10px; color: var(--text-secondary);">ðŸ›ï¸ Or browse directly on ${filters.platform || 'store'} with your filters applied</p>
+            <button id="directLinkBtn" class="search-btn" style="display: inline-block;">
+                <span>ðŸ”— Open ${filters.platform || 'Store'} with Filters</span>
+            </button>
+        </div>
+    `;
+    
+    resultsCount.innerHTML = `Found ${data.count} products` + directLinkHtml;
+    productsGrid.innerHTML = data.products.map(product => createProductCard(product)).join("");
+    
+    // Attach event listener to direct link button
+    const directLinkBtn = document.getElementById('directLinkBtn');
+    if (directLinkBtn) {
+        directLinkBtn.addEventListener('click', async () => {
+            directLinkBtn.disabled = true;
+            directLinkBtn.innerHTML = '<span>â³ Generating link...</span>';
+            
+            const store = filters.platform.toLowerCase();
+            const searchPath = filters.category ? filters.category.toLowerCase().replace(/[^a-z0-9]+/g, '-') : filters.query;
+            
+            const link = await generateDirectLink(store, searchPath, {
+                brand: filters.brand,
+                price_min: filters.price_min,
+                price_max: filters.price_max,
+                discount: filters.discount
+            });
+            
+            if (link) {
+                window.open(link, '_blank');
+                directLinkBtn.innerHTML = '<span>âœ… Link Opened!</span>';
+                setTimeout(() => {
+                    directLinkBtn.disabled = false;
+                    directLinkBtn.innerHTML = `<span>ðŸ”— Open ${filters.platform || 'Store'} with Filters</span>`;
+                }, 2000);
+            } else {
+                directLinkBtn.disabled = false;
+                directLinkBtn.innerHTML = '<span>âŒ Failed - Try again</span>';
+                setTimeout(() => {
+                    directLinkBtn.innerHTML = `<span>ðŸ”— Open ${filters.platform || 'Store'} with Filters</span>`;
+                }, 2000);
+            }
+        });
     }
 }
 
@@ -542,7 +675,7 @@ function displayProducts(data) {
         resultsHeader.style.display = "none";
         noResults.style.display = "block";
         noResults.innerHTML = `
-            <div class="no-results-icon">😕</div>
+            <div class="no-results-icon">ðŸ˜•</div>
             <h3>No products found</h3>
             <p>Try adjusting your filters or search for something else</p>
         `;
@@ -567,7 +700,7 @@ function createProductCard(product) {
     
     const isInWishlist = userWishlist.some(p => p.id === product.id);
     const wishlistBtnClass = isInWishlist ? 'wishlist-btn active' : 'wishlist-btn';
-    const wishlistIcon = isInWishlist ? '❤️' : '🤍';
+    const wishlistIcon = isInWishlist ? 'â¤ï¸' : 'ðŸ¤';
 
     return `
         <div class="product-card" data-product-id="${product.id}">
@@ -579,23 +712,23 @@ function createProductCard(product) {
                     title="${isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}">
                     ${wishlistIcon}
                 </button>
-                ${product.discount >= 50 ? '<span class="product-badge">🔥 Hot Deal</span>' : ''}
+                ${product.discount >= 50 ? '<span class="product-badge">ðŸ”¥ Hot Deal</span>' : ''}
             </div>
             <div class="product-info">
                 <span class="product-platform ${platformClass}">${product.platform}</span>
                 <div class="product-brand">${escapeHtml(product.brand)}</div>
                 <h3 class="product-title">${escapeHtml(product.title)}</h3>
                 <div class="product-price-section">
-                    <span class="product-price">₹${formattedPrice}</span>
-                    <span class="product-original-price">₹${formattedOriginalPrice}</span>
+                    <span class="product-price">â‚¹${formattedPrice}</span>
+                    <span class="product-original-price">â‚¹${formattedOriginalPrice}</span>
                     <span class="product-discount">(${product.discount}% OFF)</span>
                 </div>
                 <div class="product-rating">
-                    <span class="rating-badge">${product.rating || 4.0} ★</span>
+                    <span class="rating-badge">${product.rating || 4.0} â˜…</span>
                     <span class="rating-count">(${formatCount(product.reviews || 100)} reviews)</span>
                 </div>
                 <a href="${getProductUrl(product.affiliate_url)}" target="_blank" rel="noopener noreferrer" class="buy-btn">
-                    Buy Now 🛒
+                    Buy Now ðŸ›’
                 </a>
             </div>
         </div>
@@ -715,7 +848,7 @@ async function loadTopDeals() {
             if (data.deals && data.deals.length > 0) {
                 initialState.style.display = "none";
                 resultsHeader.style.display = "block";
-                resultsCount.textContent = "🔥 Top Deals for You";
+                resultsCount.textContent = "ðŸ”¥ Top Deals for You";
                 productsGrid.innerHTML = data.deals.map(product => createProductCard(product)).join("");
                 dealsLoaded = true;
             }
@@ -742,13 +875,57 @@ document.addEventListener("DOMContentLoaded", () => {
     const heroSearch = document.getElementById('heroSearch');
     
     if (heroSearchBtn) {
-        heroSearchBtn.addEventListener('click', () => {
+        heroSearchBtn.addEventListener('click', async () => {
             const query = heroSearch?.value.trim() || '';
-            const searchQuery = document.getElementById('searchQuery');
-            if (searchQuery) searchQuery.value = query;
-            searchProducts();
-            // Scroll to results
-            document.querySelector('.filters-section')?.scrollIntoView({ behavior: 'smooth' });
+            if (!query) {
+                showError('Please enter a search term');
+                return;
+            }
+            
+            // Smart detection like bot
+            const searchLower = query.toLowerCase();
+            let detectedStore = 'flipkart';
+            let detectedCategory = '';
+            
+            // Detect fashion items -> Myntra
+            if (searchLower.match(/dress|kurti|saree|shirt|tshirt|jeans|shoes|heels|sandals/)) {
+                detectedStore = 'myntra';
+                if (searchLower.includes('dress')) detectedCategory = 'women-dresses';
+                else if (searchLower.includes('kurti')) detectedCategory = 'kurtas-kurtis-suits';
+                else if (searchLower.includes('saree')) detectedCategory = 'sarees';
+                else if (searchLower.includes('shirt')) detectedCategory = 'men-shirts';
+                else if (searchLower.includes('tshirt') || searchLower.includes('t-shirt')) detectedCategory = 'men-tshirts';
+            }
+            
+            // Detect price in query
+            let priceMin = 0;
+            let priceMax = 999999;
+            const underMatch = searchLower.match(/under\s*â‚¹?\s*(\d+)/);
+            if (underMatch) {
+                priceMax = parseInt(underMatch[1]);
+            }
+            const rangeMatch = searchLower.match(/(\d+)\s*[-â€“]\s*(\d+)/);
+            if (rangeMatch) {
+                priceMin = parseInt(rangeMatch[1]);
+                priceMax = parseInt(rangeMatch[2]);
+            }
+            
+            // Generate direct link
+            const link = await generateDirectLink(detectedStore, detectedCategory || query, {
+                price_min: priceMin,
+                price_max: priceMax
+            });
+            
+            if (link) {
+                window.open(link, '_blank');
+                showSuccess(`ðŸŽ¯ Opening ${detectedStore.toUpperCase()} with your filters!`);
+            } else {
+                // Fallback to search
+                const searchQuery = document.getElementById('searchQuery');
+                if (searchQuery) searchQuery.value = query;
+                searchProducts();
+                document.querySelector('.filters-section')?.scrollIntoView({ behavior: 'smooth' });
+            }
         });
     }
     
