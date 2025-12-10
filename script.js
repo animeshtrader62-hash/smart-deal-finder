@@ -1399,34 +1399,55 @@ document.addEventListener("DOMContentLoaded", () => {
         // ===== Smart Suggestions for Hero Search =====
         const SUGGESTIONS = {
             smartphones: [
-                { name: "Samsung Galaxy S24", icon: "📱" },
-                { name: "iPhone 15 Pro", icon: "🍎" },
-                { name: "OnePlus 12", icon: "🔴" },
-                { name: "Realme Narzo 60X", icon: "🟡" },
-                { name: "Vivo V29 Pro", icon: "🟣" }
+                { name: "Samsung Galaxy S24 Ultra", icon: "📱", tag: "Flagship" },
+                { name: "iPhone 15 Pro Max", icon: "🍎", tag: "Premium" },
+                { name: "OnePlus 12", icon: "🔴", tag: "Performance" },
+                { name: "Realme Narzo 70 Pro", icon: "🟡", tag: "Budget" },
+                { name: "Vivo V30 Pro", icon: "🟣", tag: "Camera" },
+                { name: "Nothing Phone 2", icon: "⚫", tag: "Unique" },
+                { name: "Google Pixel 8 Pro", icon: "🔵", tag: "AI" },
+                { name: "Xiaomi 14 Pro", icon: "🟠", tag: "Value" }
             ],
             laptops: [
-                { name: "HP Pavilion 15", icon: "💻" },
-                { name: "Dell Inspiron 14", icon: "🟦" },
-                { name: "MacBook Air M2", icon: "🍏" },
-                { name: "Lenovo Legion 5", icon: "🟩" },
-                { name: "ASUS VivoBook 16X", icon: "🟧" }
+                { name: "HP Pavilion Gaming", icon: "💻", tag: "Gaming" },
+                { name: "Dell XPS 15", icon: "🟦", tag: "Premium" },
+                { name: "MacBook Air M3", icon: "🍏", tag: "Lightweight" },
+                { name: "Lenovo Legion 5 Pro", icon: "🟩", tag: "Gaming" },
+                { name: "ASUS VivoBook S15", icon: "🟧", tag: "Everyday" },
+                { name: "Acer Aspire 5", icon: "🟢", tag: "Budget" },
+                { name: "MSI Katana 15", icon: "🔴", tag: "Gaming" }
             ],
             shoes: [
-                { name: "Nike Air Max", icon: "👟" },
-                { name: "Adidas Ultraboost", icon: "👟" },
-                { name: "Puma RS-X", icon: "👟" },
-                { name: "Campus Oxyfit", icon: "👟" }
+                { name: "Nike Air Max 270", icon: "👟", tag: "Sporty" },
+                { name: "Adidas Ultraboost 22", icon: "👟", tag: "Running" },
+                { name: "Puma RS-X", icon: "👟", tag: "Lifestyle" },
+                { name: "Campus Sutra", icon: "👟", tag: "Budget" },
+                { name: "New Balance 574", icon: "👟", tag: "Classic" },
+                { name: "Reebok Zig Kinetica", icon: "👟", tag: "Trendy" }
             ],
             earphones: [
-                { name: "boAt Airdopes 141", icon: "🎧" },
-                { name: "Sony WF-1000XM4", icon: "🎧" },
-                { name: "JBL C100TWS", icon: "🎧" }
+                { name: "boAt Airdopes 141", icon: "🎧", tag: "Budget" },
+                { name: "Sony WF-1000XM5", icon: "🎧", tag: "Premium" },
+                { name: "JBL Tune 230NC TWS", icon: "🎧", tag: "ANC" },
+                { name: "OnePlus Buds Pro 2", icon: "🎧", tag: "Quality" },
+                { name: "Noise Buds VS404", icon: "🎧", tag: "Value" },
+                { name: "Apple AirPods Pro", icon: "🎧", tag: "Apple" }
+            ],
+            watches: [
+                { name: "Fire-Boltt Phoenix Ultra", icon: "⌚", tag: "Budget" },
+                { name: "Noise ColorFit Pro 4", icon: "⌚", tag: "Features" },
+                { name: "boAt Wave Call 2", icon: "⌚", tag: "Budget" },
+                { name: "Apple Watch Series 9", icon: "⌚", tag: "Premium" },
+                { name: "Samsung Galaxy Watch 6", icon: "⌚", tag: "Android" },
+                { name: "Amazfit GTR 4", icon: "⌚", tag: "Fitness" }
             ],
             clothing: [
-                { name: "Levis 511 Jeans", icon: "👖" },
-                { name: "H&M Cotton Shirt", icon: "👕" },
-                { name: "Zara Summer Dress", icon: "👗" }
+                { name: "Levis 511 Slim Fit", icon: "👖", tag: "Jeans" },
+                { name: "H&M Cotton Shirt", icon: "👕", tag: "Casual" },
+                { name: "Zara Summer Dress", icon: "👗", tag: "Women" },
+                { name: "Roadster T-Shirt", icon: "👔", tag: "Men" },
+                { name: "Allen Solly Formal", icon: "👔", tag: "Office" },
+                { name: "Puma Track Pants", icon: "👖", tag: "Sports" }
             ]
         };
 
@@ -1455,20 +1476,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function showSuggestions(query) {
             let key = '';
+            let categoryName = '';
             query = query.toLowerCase();
-            if (query.includes('smartphone')) key = 'smartphones';
-            else if (query.includes('laptop')) key = 'laptops';
-            else if (query.includes('shoe')) key = 'shoes';
-            else if (query.includes('earphone') || query.includes('headphone')) key = 'earphones';
-            else if (query.includes('cloth') || query.includes('shirt') || query.includes('jeans') || query.includes('dress')) key = 'clothing';
+            
+            // Enhanced keyword detection
+            if (query.includes('smartphone') || query.includes('phone') || query.includes('mobile')) {
+                key = 'smartphones';
+                categoryName = '📱 Popular Smartphones';
+            } else if (query.includes('laptop') || query.includes('notebook')) {
+                key = 'laptops';
+                categoryName = '💻 Top Laptops';
+            } else if (query.includes('shoe') || query.includes('sneaker') || query.includes('footwear')) {
+                key = 'shoes';
+                categoryName = '👟 Trending Shoes';
+            } else if (query.includes('earphone') || query.includes('headphone') || query.includes('earbud') || query.includes('audio')) {
+                key = 'earphones';
+                categoryName = '🎧 Best Audio Gear';
+            } else if (query.includes('watch') || query.includes('smartwatch')) {
+                key = 'watches';
+                categoryName = '⌚ Smartwatches';
+            } else if (query.includes('cloth') || query.includes('shirt') || query.includes('jeans') || query.includes('dress') || query.includes('tshirt') || query.includes('pant')) {
+                key = 'clothing';
+                categoryName = '👕 Fashion Picks';
+            }
 
             if (key && SUGGESTIONS[key]) {
-                suggestionBox.innerHTML = SUGGESTIONS[key].map(s =>
-                    `<div class="suggestion-item" style="display:flex;align-items:center;gap:14px;padding:12px 24px;cursor:pointer;transition:background 0.2s;border-bottom:1px solid rgba(99,102,241,0.08);" onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='none'">
-                        <span style="font-size:28px;">${s.icon}</span>
-                        <span style="font-weight:600;">${s.name}</span>
+                const header = `<div style="padding:16px 24px 12px;font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;">${categoryName}</div>`;
+                const items = SUGGESTIONS[key].map(s =>
+                    `<div class="suggestion-item" style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 24px;cursor:pointer;transition:all 0.2s;border-bottom:1px solid rgba(99,102,241,0.06);" onmouseover="this.style.background='rgba(99,102,241,0.12)';this.style.transform='translateX(4px)';" onmouseout="this.style.background='none';this.style.transform='translateX(0)';">
+                        <div style="display:flex;align-items:center;gap:14px;flex:1;">
+                            <span style="font-size:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${s.icon}</span>
+                            <span style="font-weight:600;font-size:15px;color:var(--text-primary);">${s.name}</span>
+                        </div>
+                        <span style="font-size:11px;padding:4px 10px;background:rgba(99,102,241,0.15);color:var(--accent-light);border-radius:12px;font-weight:600;">${s.tag}</span>
                     </div>`
                 ).join('');
+                suggestionBox.innerHTML = header + items;
                 suggestionBox.style.display = 'block';
             } else {
                 suggestionBox.style.display = 'none';
@@ -1582,6 +1625,21 @@ document.addEventListener("DOMContentLoaded", () => {
             searchProducts();
         });
     }
+    
+    // Trending cards click handlers
+    document.querySelectorAll('.trending-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const category = card.dataset.category;
+            const searchQuery = document.getElementById('heroSearch');
+            if (searchQuery && category) {
+                searchQuery.value = category;
+                searchQuery.focus();
+                // Trigger search suggestions
+                const event = new Event('input', { bubbles: true });
+                searchQuery.dispatchEvent(event);
+            }
+        });
+    });
     
     // Filters toggle
     const filtersToggle = document.getElementById('filtersToggle');
@@ -2019,4 +2077,46 @@ function addShareModalStyles() {
 document.addEventListener('DOMContentLoaded', () => {
     initLinkGenerator();
     initCategoryWizard();
+    
+    // Add scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe trending cards
+    document.querySelectorAll('.trending-card').forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(card);
+    });
+    
+    // Observe product cards when they're added
+    const productObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                if (node.classList && node.classList.contains('product-card')) {
+                    node.style.opacity = '0';
+                    node.style.transform = 'translateY(30px)';
+                    node.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    observer.observe(node);
+                }
+            });
+        });
+    });
+    
+    const productsGrid = document.getElementById('productsGrid');
+    if (productsGrid) {
+        productObserver.observe(productsGrid, { childList: true });
+    }
 });
