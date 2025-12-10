@@ -89,27 +89,27 @@ function displayDealOfDay(deal) {
         <div class="deal-card">
             <div class="deal-image">
                 <img src="${deal.image}" alt="${escapeHtml(deal.title)}" onerror="this.src='https://via.placeholder.com/300x200?text=Deal'">
-                <span class="deal-badge">ðŸ”¥ ${deal.discount}% OFF</span>
+                <span class="deal-badge">🔥 ${deal.discount}% OFF</span>
             </div>
             <div class="deal-info">
                 <span class="deal-platform platform-${deal.platform.toLowerCase()}">${deal.platform}</span>
                 <h3 class="deal-title">${escapeHtml(deal.title)}</h3>
                 <p class="deal-brand">${escapeHtml(deal.brand)}</p>
                 <div class="deal-price">
-                    <span class="current-price">â‚¹${formatPrice(deal.price)}</span>
-                    <span class="original-price">â‚¹${formatPrice(deal.original_price)}</span>
-                    <span class="savings">You save â‚¹${formatPrice(deal.original_price - deal.price)}</span>
+                    <span class="current-price">₹${formatPrice(deal.price)}</span>
+                    <span class="original-price">₹${formatPrice(deal.original_price)}</span>
+                    <span class="savings">You save ₹${formatPrice(deal.original_price - deal.price)}</span>
                 </div>
                 <div class="deal-timer">
-                    <span>â° Ends in: </span>
+                    <span>⏰ Ends in: </span>
                     <span id="dealTimer">23:59:59</span>
                 </div>
                 <div class="deal-actions">
                     <a href="${getProductUrl(deal.affiliate_url)}" target="_blank" class="deal-buy-btn">
-                        Grab Deal ðŸ›’
+                        Grab Deal 🛒
                     </a>
                     <button class="deal-wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="handleWishlistClick('${deal.id}')">
-                        ${isInWishlist ? 'â¤ï¸' : 'ðŸ¤'}
+                        ${isInWishlist ? '❤️' : '🤍'}
                     </button>
                 </div>
             </div>
@@ -240,7 +240,7 @@ async function addToWishlist(product) {
         
         updateWishlistCount();
         updateHeartIcon(product.id, true);
-        showSuccess("Added to wishlist! â¤ï¸");
+        showSuccess("Added to wishlist! ❤️");
     } catch (error) {
         console.error("Wishlist error:", error);
         showError("Failed to add to wishlist");
@@ -289,10 +289,10 @@ function updateHeartIcon(productId, isActive) {
         if (btn) {
             if (isActive) {
                 btn.classList.add('active');
-                btn.innerHTML = 'â¤ï¸';
+                btn.innerHTML = '❤️';
             } else {
                 btn.classList.remove('active');
-                btn.innerHTML = 'ðŸ¤';
+                btn.innerHTML = '🤍';
             }
         }
     }
@@ -323,10 +323,10 @@ function displayWishlist() {
     if (userWishlist.length === 0) {
         productsGrid.innerHTML = "";
         resultsHeader.style.display = "block";
-        resultsCount.textContent = "â¤ï¸ Your Wishlist";
+        resultsCount.textContent = "❤️ Your Wishlist";
         noResults.style.display = "block";
         noResults.innerHTML = `
-            <div class="no-results-icon">â¤ï¸</div>
+            <div class="no-results-icon">❤️</div>
             <h3>Wishlist is empty</h3>
             <p>Click the heart icon on products to save them here</p>
         `;
@@ -334,7 +334,7 @@ function displayWishlist() {
     }
     
     resultsHeader.style.display = "block";
-    resultsCount.textContent = `â¤ï¸ Your Wishlist (${userWishlist.length} items)`;
+    resultsCount.textContent = `❤️ Your Wishlist (${userWishlist.length} items)`;
     productsGrid.innerHTML = userWishlist.map(product => createProductCard(product)).join("");
 }
 
@@ -380,12 +380,12 @@ async function displaySearchHistory() {
         const history = doc.exists && doc.data().searchHistory ? doc.data().searchHistory : [];
         
         resultsHeader.style.display = "block";
-        resultsCount.textContent = "ðŸ• Recent Searches";
+        resultsCount.textContent = "🕐 Recent Searches";
         
         if (history.length === 0) {
             noResults.style.display = "block";
             noResults.innerHTML = `
-                <div class="no-results-icon">ðŸ•</div>
+                <div class="no-results-icon">🕐</div>
                 <h3>No search history</h3>
                 <p>Your recent searches will appear here</p>
             `;
@@ -396,7 +396,7 @@ async function displaySearchHistory() {
             <div class="history-list">
                 ${history.map((item, index) => `
                     <div class="history-item" onclick="replaySearch(${index})">
-                        <span class="history-icon">ðŸ”</span>
+                        <span class="history-icon">🔍</span>
                         <div class="history-details">
                             <span class="history-query">${item.query || 'All Products'}</span>
                             <span class="history-filters">
@@ -464,7 +464,7 @@ quickBtns.forEach(btn => {
             const store = platformInput.value || 'Flipkart';
             const query = categoryInput.value || 'all';
             
-            showSuccess(`ðŸ”¥ Generating ${filterValue}%+ off deals...`);
+            showSuccess(`🔥 Generating ${filterValue}%+ off deals...`);
             
             const link = await generateDirectLink(store.toLowerCase(), query, {
                 discount: parseInt(filterValue)
@@ -607,7 +607,7 @@ function displayProductsWithDirectLink(data, filters) {
         resultsHeader.style.display = "none";
         noResults.style.display = "block";
         noResults.innerHTML = `
-            <div class="no-results-icon">ðŸ˜•</div>
+            <div class="no-results-icon">😕</div>
             <h3>No products found</h3>
             <p>Try adjusting your filters or search for something else</p>
         `;
@@ -620,9 +620,9 @@ function displayProductsWithDirectLink(data, filters) {
     // Add direct link button above results
     const directLinkHtml = `
         <div class="direct-link-banner glass" style="margin-bottom: 20px; padding: 15px; border-radius: 12px; text-align: center;">
-            <p style="margin-bottom: 10px; color: var(--text-secondary);">ðŸ›ï¸ Or browse directly on ${filters.platform || 'store'} with your filters applied</p>
+            <p style="margin-bottom: 10px; color: var(--text-secondary);">🛍️ Or browse directly on ${filters.platform || 'store'} with your filters applied</p>
             <button id="directLinkBtn" class="search-btn" style="display: inline-block;">
-                <span>ðŸ”— Open ${filters.platform || 'Store'} with Filters</span>
+                <span>🔗 Open ${filters.platform || 'Store'} with Filters</span>
             </button>
         </div>
     `;
@@ -635,7 +635,7 @@ function displayProductsWithDirectLink(data, filters) {
     if (directLinkBtn) {
         directLinkBtn.addEventListener('click', async () => {
             directLinkBtn.disabled = true;
-            directLinkBtn.innerHTML = '<span>â³ Generating link...</span>';
+            directLinkBtn.innerHTML = '<span>⏳ Generating link...</span>';
             
             const store = filters.platform.toLowerCase();
             const searchPath = filters.category ? filters.category.toLowerCase().replace(/[^a-z0-9]+/g, '-') : filters.query;
@@ -649,16 +649,16 @@ function displayProductsWithDirectLink(data, filters) {
             
             if (link) {
                 window.open(link, '_blank');
-                directLinkBtn.innerHTML = '<span>âœ… Link Opened!</span>';
+                directLinkBtn.innerHTML = '<span>✅ Link Opened!</span>';
                 setTimeout(() => {
                     directLinkBtn.disabled = false;
-                    directLinkBtn.innerHTML = `<span>ðŸ”— Open ${filters.platform || 'Store'} with Filters</span>`;
+                    directLinkBtn.innerHTML = `<span>🔗 Open ${filters.platform || 'Store'} with Filters</span>`;
                 }, 2000);
             } else {
                 directLinkBtn.disabled = false;
-                directLinkBtn.innerHTML = '<span>âŒ Failed - Try again</span>';
+                directLinkBtn.innerHTML = '<span>❌ Failed - Try again</span>';
                 setTimeout(() => {
-                    directLinkBtn.innerHTML = `<span>ðŸ”— Open ${filters.platform || 'Store'} with Filters</span>`;
+                    directLinkBtn.innerHTML = `<span>🔗 Open ${filters.platform || 'Store'} with Filters</span>`;
                 }, 2000);
             }
         });
@@ -675,7 +675,7 @@ function displayProducts(data) {
         resultsHeader.style.display = "none";
         noResults.style.display = "block";
         noResults.innerHTML = `
-            <div class="no-results-icon">ðŸ˜•</div>
+            <div class="no-results-icon">😕</div>
             <h3>No products found</h3>
             <p>Try adjusting your filters or search for something else</p>
         `;
@@ -700,7 +700,7 @@ function createProductCard(product) {
     
     const isInWishlist = userWishlist.some(p => p.id === product.id);
     const wishlistBtnClass = isInWishlist ? 'wishlist-btn active' : 'wishlist-btn';
-    const wishlistIcon = isInWishlist ? 'â¤ï¸' : 'ðŸ¤';
+    const wishlistIcon = isInWishlist ? '❤️' : '🤍';
 
     return `
         <div class="product-card" data-product-id="${product.id}">
@@ -712,23 +712,23 @@ function createProductCard(product) {
                     title="${isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}">
                     ${wishlistIcon}
                 </button>
-                ${product.discount >= 50 ? '<span class="product-badge">ðŸ”¥ Hot Deal</span>' : ''}
+                ${product.discount >= 50 ? '<span class="product-badge">🔥 Hot Deal</span>' : ''}
             </div>
             <div class="product-info">
                 <span class="product-platform ${platformClass}">${product.platform}</span>
                 <div class="product-brand">${escapeHtml(product.brand)}</div>
                 <h3 class="product-title">${escapeHtml(product.title)}</h3>
                 <div class="product-price-section">
-                    <span class="product-price">â‚¹${formattedPrice}</span>
-                    <span class="product-original-price">â‚¹${formattedOriginalPrice}</span>
+                    <span class="product-price">₹${formattedPrice}</span>
+                    <span class="product-original-price">₹${formattedOriginalPrice}</span>
                     <span class="product-discount">(${product.discount}% OFF)</span>
                 </div>
                 <div class="product-rating">
-                    <span class="rating-badge">${product.rating || 4.0} â˜…</span>
+                    <span class="rating-badge">${product.rating || 4.0} ★</span>
                     <span class="rating-count">(${formatCount(product.reviews || 100)} reviews)</span>
                 </div>
                 <a href="${getProductUrl(product.affiliate_url)}" target="_blank" rel="noopener noreferrer" class="buy-btn">
-                    Buy Now ðŸ›’
+                    Buy Now 🛒
                 </a>
             </div>
         </div>
@@ -848,7 +848,7 @@ async function loadTopDeals() {
             if (data.deals && data.deals.length > 0) {
                 initialState.style.display = "none";
                 resultsHeader.style.display = "block";
-                resultsCount.textContent = "ðŸ”¥ Top Deals for You";
+                resultsCount.textContent = "🔥 Top Deals for You";
                 productsGrid.innerHTML = data.deals.map(product => createProductCard(product)).join("");
                 dealsLoaded = true;
             }
@@ -900,11 +900,11 @@ document.addEventListener("DOMContentLoaded", () => {
             // Detect price in query
             let priceMin = 0;
             let priceMax = 999999;
-            const underMatch = searchLower.match(/under\s*â‚¹?\s*(\d+)/);
+            const underMatch = searchLower.match(/under\s*₹?\s*(\d+)/);
             if (underMatch) {
                 priceMax = parseInt(underMatch[1]);
             }
-            const rangeMatch = searchLower.match(/(\d+)\s*[-â€“]\s*(\d+)/);
+            const rangeMatch = searchLower.match(/(\d+)\s*[-–]\s*(\d+)/);
             if (rangeMatch) {
                 priceMin = parseInt(rangeMatch[1]);
                 priceMax = parseInt(rangeMatch[2]);
@@ -918,7 +918,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (link) {
                 window.open(link, '_blank');
-                showSuccess(`ðŸŽ¯ Opening ${detectedStore.toUpperCase()} with your filters!`);
+                showSuccess(`🎯 Opening ${detectedStore.toUpperCase()} with your filters!`);
             } else {
                 // Fallback to search
                 const searchQuery = document.getElementById('searchQuery');
@@ -1097,3 +1097,291 @@ async function logout() {
         }
     }
 }
+
+// ===== Direct Store Link Generator (Like Telegram Bot) =====
+
+// Store icons and display names
+const storeConfig = {
+    flipkart: { icon: '🛒', name: 'Flipkart', domain: 'flipkart.com', color: '#2874f0' },
+    myntra: { icon: '👗', name: 'Myntra', domain: 'myntra.com', color: '#ff3f6c' },
+    ajio: { icon: '🎯', name: 'Ajio', domain: 'ajio.com', color: '#3d3d3d' }
+};
+
+// Initialize link generator
+function initLinkGenerator() {
+    const generateBtn = document.getElementById('generateLinkBtn');
+    const copyBtn = document.getElementById('copyLinkBtn');
+    const shareBtn = document.getElementById('shareLinkBtn');
+    const linkCard = document.getElementById('generatedLinkCard');
+    const linkPreview = document.querySelector('.link-card-preview');
+    
+    if (generateBtn) {
+        generateBtn.addEventListener('click', handleGenerateLink);
+    }
+    
+    if (copyBtn) {
+        copyBtn.addEventListener('click', handleCopyLink);
+    }
+    
+    if (shareBtn) {
+        shareBtn.addEventListener('click', handleShareLink);
+    }
+    
+    // Click on preview to open link
+    if (linkPreview) {
+        linkPreview.addEventListener('click', () => {
+            const openBtn = document.getElementById('openLinkBtn');
+            if (openBtn) window.open(openBtn.href, '_blank');
+        });
+    }
+    
+    // Enter key on query input
+    const queryInput = document.getElementById('linkQuery');
+    if (queryInput) {
+        queryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleGenerateLink();
+        });
+    }
+}
+
+// Generate link handler
+async function handleGenerateLink() {
+    const generateBtn = document.getElementById('generateLinkBtn');
+    const linkCard = document.getElementById('generatedLinkCard');
+    
+    // Get values
+    const store = document.getElementById('linkStore')?.value || 'flipkart';
+    const query = document.getElementById('linkQuery')?.value.trim();
+    const brand = document.getElementById('linkBrand')?.value.trim() || '';
+    const minPrice = parseInt(document.getElementById('linkMinPrice')?.value) || 0;
+    const maxPrice = parseInt(document.getElementById('linkMaxPrice')?.value) || 999999;
+    const discount = parseInt(document.getElementById('linkDiscount')?.value) || 0;
+    
+    // Validation
+    if (!query) {
+        showError('Please enter what you\'re looking for!');
+        document.getElementById('linkQuery')?.focus();
+        return;
+    }
+    
+    // Show loading state
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Generating...</span>';
+    
+    try {
+        const link = await generateDirectLink(store, query, {
+            brand: brand,
+            price_min: minPrice,
+            price_max: maxPrice,
+            discount: discount
+        });
+        
+        if (link) {
+            // Show the link card
+            displayGeneratedLink(store, query, brand, minPrice, maxPrice, discount, link);
+            showSuccess('🔗 Link generated successfully!');
+        } else {
+            showError('Failed to generate link. Try again!');
+        }
+    } catch (error) {
+        console.error('Link generation error:', error);
+        showError('Something went wrong. Please try again.');
+    } finally {
+        // Reset button
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> <span>Generate Link</span>';
+    }
+}
+
+// Display the generated link in attractive card
+function displayGeneratedLink(store, query, brand, minPrice, maxPrice, discount, link) {
+    const linkCard = document.getElementById('generatedLinkCard');
+    const config = storeConfig[store];
+    
+    // Build title
+    let title = `${query.charAt(0).toUpperCase() + query.slice(1)}`;
+    if (brand) title += ` by ${brand}`;
+    title += ` on ${config.name}`;
+    
+    // Build description with filters
+    let desc = '🛍️ ';
+    const filters = [];
+    if (discount > 0) filters.push(`${discount}%+ off`);
+    if (minPrice > 0 && maxPrice < 999999) filters.push(`₹${minPrice.toLocaleString()} - ₹${maxPrice.toLocaleString()}`);
+    else if (minPrice > 0) filters.push(`Min ₹${minPrice.toLocaleString()}`);
+    else if (maxPrice < 999999) filters.push(`Under ₹${maxPrice.toLocaleString()}`);
+    
+    desc += filters.length > 0 ? filters.join(' • ') : 'All best deals with filters applied';
+    
+    // Display short URL
+    const shortUrl = link.length > 60 ? link.substring(0, 57) + '...' : link;
+    
+    // Update card
+    document.getElementById('linkPreviewIcon').textContent = config.icon;
+    document.getElementById('linkPreviewTitle').textContent = title;
+    document.getElementById('linkPreviewDesc').textContent = desc;
+    document.getElementById('linkPreviewUrl').textContent = shortUrl;
+    document.getElementById('openLinkBtn').href = link;
+    document.getElementById('generatedLinkUrl').value = link;
+    
+    // Show card with animation
+    linkCard.style.display = 'block';
+    linkCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Copy link to clipboard
+async function handleCopyLink() {
+    const link = document.getElementById('generatedLinkUrl')?.value;
+    const copyBtn = document.getElementById('copyLinkBtn');
+    
+    if (!link) {
+        showError('No link to copy!');
+        return;
+    }
+    
+    try {
+        await navigator.clipboard.writeText(link);
+        
+        // Visual feedback
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> <span>Copied!</span>';
+        showSuccess('📋 Link copied to clipboard!');
+        
+        setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> <span>Copy Link</span>';
+        }, 2000);
+    } catch (error) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = link;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showSuccess('📋 Link copied!');
+    }
+}
+
+// Share link (Web Share API or fallback)
+async function handleShareLink() {
+    const link = document.getElementById('generatedLinkUrl')?.value;
+    const title = document.getElementById('linkPreviewTitle')?.textContent || 'Check out this deal!';
+    const query = document.getElementById('linkQuery')?.value || 'products';
+    
+    if (!link) {
+        showError('No link to share!');
+        return;
+    }
+    
+    const shareText = `🛍️ ${title}\n\n💰 Best deals with filters applied!\n\n🔗 Shop now: ${link}\n\n📱 Found via SmartDeals - Your Smart Shopping Companion`;
+    
+    // Check if Web Share API is available
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: title,
+                text: `🛍️ Check out ${query} deals!`,
+                url: link
+            });
+            showSuccess('Shared successfully! 🎉');
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                // User cancelled share, try copy fallback
+                handleCopyLink();
+            }
+        }
+    } else {
+        // Fallback: Open share options popup
+        openSharePopup(link, title, shareText);
+    }
+}
+
+// Share popup for desktop/unsupported browsers
+function openSharePopup(link, title, shareText) {
+    const encodedUrl = encodeURIComponent(link);
+    const encodedTitle = encodeURIComponent(title);
+    const encodedText = encodeURIComponent(shareText);
+    
+    // Create share modal
+    const modal = document.createElement('div');
+    modal.className = 'share-modal';
+    modal.innerHTML = `
+        <div class="share-modal-content glass">
+            <div class="share-modal-header">
+                <h3>📤 Share This Deal</h3>
+                <button class="share-modal-close">&times;</button>
+            </div>
+            <div class="share-options">
+                <a href="https://wa.me/?text=${encodedText}" target="_blank" class="share-option whatsapp">
+                    <span class="share-icon">💬</span>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodeURIComponent('🛍️ ' + title + ' - Best deals!')}" target="_blank" class="share-option twitter">
+                    <span class="share-icon">🐦</span>
+                    <span>Twitter</span>
+                </a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}" target="_blank" class="share-option linkedin">
+                    <span class="share-icon">💼</span>
+                    <span>LinkedIn</span>
+                </a>
+                <a href="https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}" target="_blank" class="share-option telegram">
+                    <span class="share-icon">✈️</span>
+                    <span>Telegram</span>
+                </a>
+                <a href="mailto:?subject=${encodedTitle}&body=${encodedText}" class="share-option email">
+                    <span class="share-icon">📧</span>
+                    <span>Email</span>
+                </a>
+                <button class="share-option copy" onclick="handleCopyLink(); this.closest('.share-modal').remove();">
+                    <span class="share-icon">📋</span>
+                    <span>Copy Link</span>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close handlers
+    modal.querySelector('.share-modal-close').onclick = () => modal.remove();
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    
+    // Add modal styles
+    addShareModalStyles();
+}
+
+// Add share modal styles dynamically
+function addShareModalStyles() {
+    if (document.getElementById('share-modal-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'share-modal-styles';
+    style.textContent = `
+        .share-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .share-modal-content { background: var(--bg-card); padding: 24px; border-radius: 16px; max-width: 400px; width: 90%; animation: slideUp 0.3s ease; }
+        .share-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .share-modal-header h3 { margin: 0; font-size: 18px; color: var(--text-primary); }
+        .share-modal-close { font-size: 28px; color: var(--text-muted); background: none; border: none; cursor: pointer; line-height: 1; }
+        .share-modal-close:hover { color: var(--text-primary); }
+        .share-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .share-option { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; background: var(--bg-elevated); border-radius: 12px; color: var(--text-primary); font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; }
+        .share-option:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .share-icon { font-size: 24px; }
+        .share-option.whatsapp:hover { background: #25D366; color: white; }
+        .share-option.twitter:hover { background: #1DA1F2; color: white; }
+        .share-option.linkedin:hover { background: #0077B5; color: white; }
+        .share-option.telegram:hover { background: #0088cc; color: white; }
+        .share-option.email:hover { background: var(--accent); color: white; }
+        .share-option.copy:hover { background: var(--gradient-success); color: white; }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    `;
+    document.head.appendChild(style);
+}
+
+// Initialize link generator when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    initLinkGenerator();
+});
