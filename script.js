@@ -1396,6 +1396,109 @@ async function loadTopDeals() {
 
 // ===== Initialize =====
 document.addEventListener("DOMContentLoaded", () => {
+        // ===== Smart Suggestions for Hero Search =====
+        const SUGGESTIONS = {
+            smartphones: [
+                { name: "Samsung Galaxy S24", icon: "📱" },
+                { name: "iPhone 15 Pro", icon: "🍎" },
+                { name: "OnePlus 12", icon: "🔴" },
+                { name: "Realme Narzo 60X", icon: "🟡" },
+                { name: "Vivo V29 Pro", icon: "🟣" }
+            ],
+            laptops: [
+                { name: "HP Pavilion 15", icon: "💻" },
+                { name: "Dell Inspiron 14", icon: "🟦" },
+                { name: "MacBook Air M2", icon: "🍏" },
+                { name: "Lenovo Legion 5", icon: "🟩" },
+                { name: "ASUS VivoBook 16X", icon: "🟧" }
+            ],
+            shoes: [
+                { name: "Nike Air Max", icon: "👟" },
+                { name: "Adidas Ultraboost", icon: "👟" },
+                { name: "Puma RS-X", icon: "👟" },
+                { name: "Campus Oxyfit", icon: "👟" }
+            ],
+            earphones: [
+                { name: "boAt Airdopes 141", icon: "🎧" },
+                { name: "Sony WF-1000XM4", icon: "🎧" },
+                { name: "JBL C100TWS", icon: "🎧" }
+            ],
+            clothing: [
+                { name: "Levis 511 Jeans", icon: "👖" },
+                { name: "H&M Cotton Shirt", icon: "👕" },
+                { name: "Zara Summer Dress", icon: "👗" }
+            ]
+        };
+
+        // Create suggestion dropdown
+        const suggestionBox = document.createElement('div');
+        suggestionBox.id = 'heroSuggestionBox';
+        suggestionBox.style.position = 'absolute';
+        suggestionBox.style.top = '60px';
+        suggestionBox.style.left = '0';
+        suggestionBox.style.width = '100%';
+        suggestionBox.style.zIndex = '100';
+        suggestionBox.style.background = 'rgba(30, 30, 40, 0.98)';
+        suggestionBox.style.borderRadius = '16px';
+        suggestionBox.style.boxShadow = '0 8px 32px rgba(99,102,241,0.18)';
+        suggestionBox.style.display = 'none';
+        suggestionBox.style.padding = '12px 0';
+        suggestionBox.style.maxHeight = '320px';
+        suggestionBox.style.overflowY = 'auto';
+        suggestionBox.style.fontSize = '16px';
+        suggestionBox.style.color = '#fff';
+        suggestionBox.style.backdropFilter = 'blur(8px)';
+        suggestionBox.style.border = '1px solid rgba(99,102,241,0.18)';
+
+        const heroSearchWrapper = document.querySelector('.hero-search');
+        if (heroSearchWrapper) heroSearchWrapper.appendChild(suggestionBox);
+
+        function showSuggestions(query) {
+            let key = '';
+            query = query.toLowerCase();
+            if (query.includes('smartphone')) key = 'smartphones';
+            else if (query.includes('laptop')) key = 'laptops';
+            else if (query.includes('shoe')) key = 'shoes';
+            else if (query.includes('earphone') || query.includes('headphone')) key = 'earphones';
+            else if (query.includes('cloth') || query.includes('shirt') || query.includes('jeans') || query.includes('dress')) key = 'clothing';
+
+            if (key && SUGGESTIONS[key]) {
+                suggestionBox.innerHTML = SUGGESTIONS[key].map(s =>
+                    `<div class="suggestion-item" style="display:flex;align-items:center;gap:14px;padding:12px 24px;cursor:pointer;transition:background 0.2s;border-bottom:1px solid rgba(99,102,241,0.08);" onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='none'">
+                        <span style="font-size:28px;">${s.icon}</span>
+                        <span style="font-weight:600;">${s.name}</span>
+                    </div>`
+                ).join('');
+                suggestionBox.style.display = 'block';
+            } else {
+                suggestionBox.style.display = 'none';
+            }
+        }
+
+        if (heroSearch) {
+            heroSearch.addEventListener('input', (e) => {
+                const val = heroSearch.value.trim();
+                if (val.length > 2) {
+                    showSuggestions(val);
+                } else {
+                    suggestionBox.style.display = 'none';
+                }
+            });
+
+            suggestionBox.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.suggestion-item')) {
+                    const text = e.target.closest('.suggestion-item').innerText;
+                    heroSearch.value = text;
+                    suggestionBox.style.display = 'none';
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!heroSearchWrapper.contains(e.target)) {
+                    suggestionBox.style.display = 'none';
+                }
+            });
+        }
     // Initialize brand dropdown with all brands
     updateBrandDropdown('');
     
