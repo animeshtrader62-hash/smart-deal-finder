@@ -1626,21 +1626,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    // Trending cards click handlers
-    document.querySelectorAll('.trending-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const category = card.dataset.category;
-            const searchQuery = document.getElementById('heroSearch');
-            if (searchQuery && category) {
-                searchQuery.value = category;
-                searchQuery.focus();
-                // Trigger search suggestions
-                const event = new Event('input', { bubbles: true });
-                searchQuery.dispatchEvent(event);
-            }
-        });
-    });
-    
     // Filters toggle
     const filtersToggle = document.getElementById('filtersToggle');
     const filtersGrid = document.getElementById('filtersGrid');
@@ -2078,7 +2063,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLinkGenerator();
     initCategoryWizard();
     
-    // Add scroll animations
+    // Add scroll animations for product cards
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -2092,14 +2077,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, observerOptions);
-    
-    // Observe trending cards
-    document.querySelectorAll('.trending-card').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-        observer.observe(card);
-    });
     
     // Observe product cards when they're added
     const productObserver = new MutationObserver((mutations) => {
