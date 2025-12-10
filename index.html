@@ -514,50 +514,11 @@
             localStorage.setItem('theme', newTheme);
         });
 
-        // Filters toggle for mobile
-        document.getElementById('filtersToggle').addEventListener('click', function() {
-            const filtersGrid = document.getElementById('filtersGrid');
-            const toggleIcon = this.querySelector('.toggle-icon');
-            const toggleText = this.querySelector('span');
-            
-            filtersGrid.classList.toggle('show');
-            if (filtersGrid.classList.contains('show')) {
-                toggleIcon.style.transform = 'rotate(180deg)';
-                toggleText.textContent = 'Hide Filters';
-            } else {
-                toggleIcon.style.transform = 'rotate(0deg)';
-                toggleText.textContent = 'Show Filters';
-            }
-        });
-
-        // Explore all deals button
-        document.getElementById('exploreBtn').addEventListener('click', function() {
-            document.getElementById('searchBtn').click();
-        });
-
-        // Hero search
-        document.getElementById('heroSearchBtn').addEventListener('click', function() {
-            const query = document.getElementById('heroSearch').value;
-            document.getElementById('searchQuery').value = query;
-            document.getElementById('searchBtn').click();
-        });
-        
-        document.getElementById('heroSearch').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('heroSearchBtn').click();
-            }
-        });
-
         // Mobile menu
-        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', function() {
             this.classList.toggle('active');
-            document.getElementById('mobileNav').classList.toggle('show');
+            document.getElementById('mobileNav')?.classList.toggle('show');
         });
-
-        // Clear filters function
-        function clearFilters() {
-            document.getElementById('clearBtn').click();
-        }
     </script>
     <script src="script.js"></script>
 </body>
