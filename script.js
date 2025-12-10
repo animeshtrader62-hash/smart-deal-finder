@@ -576,17 +576,20 @@ async function searchProducts() {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         
-        // If filters are applied, also show direct link option
-        if (data.count > 0 && (platform || category) && searchQuery) {
-            displayProductsWithDirectLink(data, {
-                platform: platform || 'Flipkart',
-                query: searchQuery,
-                category: category,
-                brand: brand,
-                price_min: parseInt(minPrice) || 0,
-                price_max: parseInt(maxPrice) || 999999,
-                discount: parseInt(minDiscount) || 0
-            });
+        // Always show direct link option when platform is selected
+        const filters = {
+            platform: platform || 'Flipkart',
+            query: searchQuery || category || 'deals',
+            category: category,
+            brand: brand,
+            price_min: parseInt(minPrice) || 0,
+            price_max: parseInt(maxPrice) || 999999,
+            discount: parseInt(minDiscount) || 0
+        };
+        
+        // Always use displayProductsWithDirectLink when platform or search is specified
+        if (platform || searchQuery || category) {
+            displayProductsWithDirectLink(data, filters);
         } else {
             displayProducts(data);
         }
@@ -602,45 +605,80 @@ function displayProductsWithDirectLink(data, filters) {
     hideLoading();
     initialState.style.display = "none";
 
+    // Always show direct link banner - even with no results
+    const storeName = filters.platform || 'Store';
+    const directLinkHtml = `
+        <div class="direct-store-link-card" id="directStoreLinkCard">
+            <div class="store-link-glow"></div>
+            <div class="store-link-content">
+                <div class="store-link-icon">${getStoreEmoji(storeName)}</div>
+                <div class="store-link-info">
+                    <h4>🔗 Browse on ${storeName}</h4>
+                    <p>Click to open ${storeName} with your filters applied</p>
+                    <div class="store-link-filters">
+                        ${filters.query ? `<span class="filter-tag">🔍 ${filters.query}</span>` : ''}
+                        ${filters.brand ? `<span class="filter-tag">🏷️ ${filters.brand}</span>` : ''}
+                        ${filters.price_max < 999999 ? `<span class="filter-tag">💰 Under ₹${filters.price_max}</span>` : ''}
+                        ${filters.discount > 0 ? `<span class="filter-tag">🔥 ${filters.discount}%+ off</span>` : ''}
+                    </div>
+                </div>
+                <button class="store-link-btn" id="directLinkBtn">
+                    <span class="btn-text">Open ${storeName}</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    `;
+
     if (data.count === 0) {
         productsGrid.innerHTML = "";
-        resultsHeader.style.display = "none";
+        resultsHeader.style.display = "block";
+        resultsCount.innerHTML = `<span style="color: var(--text-secondary);">No products in our database</span>`;
         noResults.style.display = "block";
         noResults.innerHTML = `
-            <div class="no-results-icon">😕</div>
-            <h3>No products found</h3>
-            <p>Try adjusting your filters or search for something else</p>
+            <div class="no-results-icon">🛒</div>
+            <h3>No products found in our catalog</h3>
+            <p style="margin-bottom: 20px;">But you can browse directly on ${storeName}!</p>
+            ${directLinkHtml}
         `;
+        attachDirectLinkHandler(filters);
         return;
     }
 
     noResults.style.display = "none";
     resultsHeader.style.display = "block";
+    resultsCount.innerHTML = `Found ${data.count} products`;
     
-    // Add direct link button above results
-    const directLinkHtml = `
-        <div class="direct-link-banner glass" style="margin-bottom: 20px; padding: 15px; border-radius: 12px; text-align: center;">
-            <p style="margin-bottom: 10px; color: var(--text-secondary);">🛍️ Or browse directly on ${filters.platform || 'store'} with your filters applied</p>
-            <button id="directLinkBtn" class="search-btn" style="display: inline-block;">
-                <span>🔗 Open ${filters.platform || 'Store'} with Filters</span>
-            </button>
-        </div>
-    `;
-    
-    resultsCount.innerHTML = `Found ${data.count} products` + directLinkHtml;
-    productsGrid.innerHTML = data.products.map(product => createProductCard(product)).join("");
-    
-    // Attach event listener to direct link button
+    // Add direct link card before products
+    productsGrid.innerHTML = directLinkHtml + data.products.map(product => createProductCard(product)).join("");
+    attachDirectLinkHandler(filters);
+}
+
+// Get store emoji
+function getStoreEmoji(store) {
+    const emojis = {
+        'Flipkart': '🛒',
+        'flipkart': '🛒',
+        'Myntra': '👗',
+        'myntra': '👗',
+        'Ajio': '🎯',
+        'ajio': '🎯'
+    };
+    return emojis[store] || '🛍️';
+}
+
+// Attach click handler for direct link button
+function attachDirectLinkHandler(filters) {
     const directLinkBtn = document.getElementById('directLinkBtn');
     if (directLinkBtn) {
         directLinkBtn.addEventListener('click', async () => {
             directLinkBtn.disabled = true;
-            directLinkBtn.innerHTML = '<span>⏳ Generating link...</span>';
+            directLinkBtn.querySelector('.btn-text').textContent = '⏳ Generating...';
             
-            const store = filters.platform.toLowerCase();
-            const searchPath = filters.category ? filters.category.toLowerCase().replace(/[^a-z0-9]+/g, '-') : filters.query;
+            const store = (filters.platform || 'flipkart').toLowerCase();
+            const query = filters.query || filters.category || 'deals';
             
-            const link = await generateDirectLink(store, searchPath, {
+            const link = await generateDirectLink(store, query, {
                 brand: filters.brand,
                 price_min: filters.price_min,
                 price_max: filters.price_max,
@@ -648,21 +686,96 @@ function displayProductsWithDirectLink(data, filters) {
             });
             
             if (link) {
+                // Show the link before opening
+                showGeneratedLinkPopup(link, filters.platform || 'Store', query);
                 window.open(link, '_blank');
-                directLinkBtn.innerHTML = '<span>✅ Link Opened!</span>';
+                directLinkBtn.querySelector('.btn-text').textContent = '✅ Opened!';
                 setTimeout(() => {
                     directLinkBtn.disabled = false;
-                    directLinkBtn.innerHTML = `<span>🔗 Open ${filters.platform || 'Store'} with Filters</span>`;
+                    directLinkBtn.querySelector('.btn-text').textContent = `Open ${filters.platform || 'Store'}`;
                 }, 2000);
             } else {
                 directLinkBtn.disabled = false;
-                directLinkBtn.innerHTML = '<span>❌ Failed - Try again</span>';
+                directLinkBtn.querySelector('.btn-text').textContent = '❌ Failed';
                 setTimeout(() => {
-                    directLinkBtn.innerHTML = `<span>🔗 Open ${filters.platform || 'Store'} with Filters</span>`;
+                    directLinkBtn.querySelector('.btn-text').textContent = `Open ${filters.platform || 'Store'}`;
                 }, 2000);
             }
         });
     }
+}
+
+// Show popup with generated link for sharing
+function showGeneratedLinkPopup(link, store, query) {
+    // Remove existing popup if any
+    const existingPopup = document.querySelector('.link-popup-overlay');
+    if (existingPopup) existingPopup.remove();
+    
+    const popup = document.createElement('div');
+    popup.className = 'link-popup-overlay';
+    popup.innerHTML = `
+        <div class="link-popup glass">
+            <button class="link-popup-close">&times;</button>
+            <div class="link-popup-header">
+                <span class="link-popup-icon">${getStoreEmoji(store)}</span>
+                <h3>Your Link is Ready!</h3>
+            </div>
+            <div class="link-popup-preview">
+                <strong>${query} on ${store}</strong>
+                <p class="link-url">${link.substring(0, 50)}...</p>
+            </div>
+            <div class="link-popup-actions">
+                <button class="link-popup-btn copy" id="popupCopyBtn">
+                    📋 Copy Link
+                </button>
+                <button class="link-popup-btn share" id="popupShareBtn">
+                    📤 Share
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Close handlers
+    popup.querySelector('.link-popup-close').onclick = () => popup.remove();
+    popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
+    
+    // Copy button
+    popup.querySelector('#popupCopyBtn').onclick = async () => {
+        try {
+            await navigator.clipboard.writeText(link);
+            popup.querySelector('#popupCopyBtn').textContent = '✅ Copied!';
+            showSuccess('Link copied to clipboard!');
+        } catch (e) {
+            // Fallback
+            const ta = document.createElement('textarea');
+            ta.value = link;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            popup.querySelector('#popupCopyBtn').textContent = '✅ Copied!';
+        }
+    };
+    
+    // Share button
+    popup.querySelector('#popupShareBtn').onclick = async () => {
+        const shareText = `🛍️ Check out ${query} on ${store}!\n\n🔗 ${link}`;
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: `${query} on ${store}`, url: link });
+            } catch (e) {}
+        } else {
+            // Copy for sharing
+            await navigator.clipboard.writeText(shareText);
+            popup.querySelector('#popupShareBtn').textContent = '✅ Copied!';
+            showSuccess('Share text copied!');
+        }
+    };
+    
+    // Auto close after 10 seconds
+    setTimeout(() => popup.remove(), 10000);
 }
 
 // ===== Display Products =====
