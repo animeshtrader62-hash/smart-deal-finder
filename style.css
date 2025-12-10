@@ -367,6 +367,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .telegram-btn:hover { background: var(--glass-hover); }
 .footer-bottom { padding-top: 24px; border-top: 1px solid var(--glass-border); }
 .footer-copy { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+.footer-author { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+.footer-author .author-link { color: var(--accent-light); text-decoration: none; font-weight: 600; transition: var(--transition-fast); }
+.footer-author .author-link:hover { color: var(--accent); text-decoration: underline; }
 .footer-disclaimer { font-size: 12px; color: var(--text-muted); }
 
 /* Toasts */
