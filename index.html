@@ -143,93 +143,131 @@
         </div>
     </section>
 
-    <!-- Direct Store Link Generator -->
-    <section class="store-link-generator" id="storeLinkSection">
-        <div class="link-gen-container glass">
-            <div class="link-gen-header">
-                <div class="link-gen-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                </div>
-                <div class="link-gen-title">
-                    <h3>🔗 Generate Store Link</h3>
-                    <span class="link-gen-badge">Like Telegram Bot</span>
-                </div>
-            </div>
-            <p class="link-gen-desc">Create direct store links with filters applied - click and shop instantly!</p>
-            
-            <div class="link-gen-grid">
-                <div class="link-gen-group">
-                    <label>Store</label>
-                    <div class="select-wrapper">
-                        <select id="linkStore">
-                            <option value="flipkart">🛒 Flipkart</option>
-                            <option value="myntra">👗 Myntra</option>
-                            <option value="ajio">🎯 Ajio</option>
-                        </select>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                    </div>
-                </div>
-                
-                <div class="link-gen-group">
-                    <label>What are you looking for?</label>
-                    <input type="text" id="linkQuery" placeholder="e.g. smartphones, red dress, running shoes...">
-                </div>
-                
-                <div class="link-gen-group">
-                    <label>Brand (Optional)</label>
-                    <input type="text" id="linkBrand" placeholder="e.g. Samsung, Nike, H&M...">
-                </div>
-                
-                <div class="link-gen-group link-gen-row">
-                    <div class="link-gen-half">
-                        <label>Min Price (₹)</label>
-                        <input type="number" id="linkMinPrice" placeholder="0" min="0">
-                    </div>
-                    <div class="link-gen-half">
-                        <label>Max Price (₹)</label>
-                        <input type="number" id="linkMaxPrice" placeholder="No limit" min="0">
-                    </div>
-                </div>
-                
-                <div class="link-gen-group">
-                    <label>Min Discount (%)</label>
-                    <input type="number" id="linkDiscount" placeholder="0" min="0" max="100">
-                </div>
-                
-                <button class="generate-link-btn" id="generateLinkBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    <span>Generate Link</span>
-                </button>
+    <!-- 🛒 CATEGORY WIZARD - Like Telegram Bot -->
+    <section class="category-wizard" id="categoryWizard">
+        <div class="wizard-container glass">
+            <div class="wizard-header">
+                <h2>🛍️ Shop by Category</h2>
+                <p>Select category → filters → get direct store link (like Telegram Bot!)</p>
             </div>
             
-            <!-- Generated Link Card (LinkedIn-style preview) -->
-            <div class="generated-link-card" id="generatedLinkCard" style="display: none;">
-                <div class="link-card-header">
-                    <span class="link-card-badge">✨ Your Link is Ready!</span>
+            <!-- Progress Bar -->
+            <div class="wizard-progress" id="wizardProgress">
+                <div class="progress-step active" data-step="1">
+                    <span class="step-num">1</span>
+                    <span class="step-label">Category</span>
                 </div>
-                <div class="link-card-preview">
-                    <div class="link-preview-icon" id="linkPreviewIcon">🛒</div>
-                    <div class="link-preview-content">
-                        <h4 id="linkPreviewTitle">Smartphones on Flipkart</h4>
-                        <p id="linkPreviewDesc">Browse the best deals with your filters applied</p>
-                        <span class="link-preview-url" id="linkPreviewUrl">flipkart.com/search?q=...</span>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-num">2</span>
+                    <span class="step-label">Brand</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <span class="step-num">3</span>
+                    <span class="step-label">Price</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="4">
+                    <span class="step-num">4</span>
+                    <span class="step-label">Discount</span>
+                </div>
+            </div>
+            
+            <!-- Step 1: Main Categories -->
+            <div class="wizard-step active" id="wizardStep1">
+                <h3>📂 Choose a Category</h3>
+                
+                <div class="category-tabs">
+                    <button class="cat-tab active" data-tab="electronics">🔌 Electronics</button>
+                    <button class="cat-tab" data-tab="mens">👔 Men's Fashion</button>
+                    <button class="cat-tab" data-tab="womens">👗 Women's Fashion</button>
+                    <button class="cat-tab" data-tab="beauty">💄 Beauty</button>
+                </div>
+                
+                <div class="category-grid" id="categoryGrid">
+                    <!-- Electronics -->
+                    <div class="cat-section active" data-section="electronics">
+                        <button class="cat-btn" data-cat="smartphones">📱 Smartphones</button>
+                        <button class="cat-btn" data-cat="laptops">💻 Laptops</button>
+                        <button class="cat-btn" data-cat="audio">🎧 Headphones & Earbuds</button>
+                        <button class="cat-btn" data-cat="smartwatches">⌚ Smartwatches</button>
+                    </div>
+                    <!-- Men's Fashion -->
+                    <div class="cat-section" data-section="mens">
+                        <button class="cat-btn" data-cat="mens-tshirts">👔 T-Shirts</button>
+                        <button class="cat-btn" data-cat="mens-shirts">👕 Shirts</button>
+                        <button class="cat-btn" data-cat="shoes-men">👟 Sports Shoes</button>
+                    </div>
+                    <!-- Women's Fashion -->
+                    <div class="cat-section" data-section="womens">
+                        <button class="cat-btn" data-cat="womens-dresses">👗 Dresses</button>
+                        <button class="cat-btn" data-cat="womens-kurtis">🥻 Kurtis & Suits</button>
+                        <button class="cat-btn" data-cat="womens-sarees">🪭 Sarees</button>
+                        <button class="cat-btn" data-cat="shoes-women">👠 Heels & Shoes</button>
+                    </div>
+                    <!-- Beauty -->
+                    <div class="cat-section" data-section="beauty">
+                        <button class="cat-btn" data-cat="beauty">💄 Beauty & Makeup</button>
                     </div>
                 </div>
-                <div class="link-card-actions">
-                    <a href="#" id="openLinkBtn" target="_blank" class="link-action-btn primary">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                        <span>Open Store</span>
-                    </a>
-                    <button class="link-action-btn secondary" id="copyLinkBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                        <span>Copy Link</span>
-                    </button>
-                    <button class="link-action-btn share" id="shareLinkBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        <span>Share</span>
-                    </button>
+            </div>
+            
+            <!-- Step 2: Brands -->
+            <div class="wizard-step" id="wizardStep2">
+                <div class="step-header">
+                    <button class="back-btn" id="backToStep1">← Back</button>
+                    <h3 id="brandTitle">🏷️ Select Brand</h3>
                 </div>
-                <input type="hidden" id="generatedLinkUrl" value="">
+                <div class="brand-grid" id="brandGrid">
+                    <!-- Brands loaded dynamically -->
+                </div>
+            </div>
+            
+            <!-- Step 3: Price -->
+            <div class="wizard-step" id="wizardStep3">
+                <div class="step-header">
+                    <button class="back-btn" id="backToStep2">← Back</button>
+                    <h3>💰 Select Price Range</h3>
+                </div>
+                <div class="price-grid" id="priceGrid">
+                    <!-- Prices loaded dynamically -->
+                </div>
+            </div>
+            
+            <!-- Step 4: Discount -->
+            <div class="wizard-step" id="wizardStep4">
+                <div class="step-header">
+                    <button class="back-btn" id="backToStep3">← Back</button>
+                    <h3>🏷️ Minimum Discount</h3>
+                </div>
+                <div class="discount-grid" id="discountGrid">
+                    <!-- Discounts loaded dynamically -->
+                </div>
+                <button class="skip-btn" id="skipDiscount">⏭️ Skip Discount Filter</button>
+            </div>
+            
+            <!-- Final Result -->
+            <div class="wizard-step" id="wizardResult">
+                <div class="result-card">
+                    <div class="result-header">
+                        <span class="result-badge">✅ Your Selection</span>
+                    </div>
+                    <div class="result-summary" id="resultSummary">
+                        <!-- Selection summary -->
+                    </div>
+                    <div class="result-actions">
+                        <a href="#" id="shopNowBtn" class="shop-now-btn" target="_blank">
+                            <span id="shopNowIcon">🛒</span>
+                            <span>Shop Now on <span id="shopNowStore">Flipkart</span></span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                        <div class="result-subactions">
+                            <button class="copy-link-btn" id="resultCopyBtn">📋 Copy Link</button>
+                            <button class="new-search-btn" id="newSearchBtn">🔄 New Search</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

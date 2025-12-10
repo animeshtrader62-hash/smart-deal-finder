@@ -1,6 +1,424 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
+// ===== CATEGORIES DATA (Same as Telegram Bot) =====
+const CATEGORIES = {
+    "smartphones": {
+        "name": "📱 Smartphones",
+        "store": "flipkart",
+        "search": "smartphones",
+        "brands": {
+            "samsung": "Samsung", "apple": "Apple", "oneplus": "OnePlus",
+            "redmi": "Redmi", "realme": "Realme", "vivo": "Vivo",
+            "oppo": "OPPO", "poco": "POCO", "iqoo": "iQOO",
+            "motorola": "Motorola", "nothing": "Nothing", "google": "Google Pixel",
+            "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹7K", 0, 7000], ["₹7K-10K", 7000, 10000],
+            ["₹10K-15K", 10000, 15000], ["₹15K-20K", 15000, 20000],
+            ["₹20K-30K", 20000, 30000], ["₹30K-50K", 30000, 50000],
+            ["₹50K-80K", 50000, 80000], ["Above ₹80K", 80000, 200000]
+        ],
+        "discounts": [["10%+", 10], ["20%+", 20], ["30%+", 30], ["40%+", 40]]
+    },
+    "laptops": {
+        "name": "💻 Laptops",
+        "store": "flipkart",
+        "search": "laptops",
+        "brands": {
+            "hp": "HP", "dell": "Dell", "lenovo": "Lenovo",
+            "asus": "ASUS", "acer": "Acer", "msi": "MSI",
+            "apple": "Apple MacBook", "avita": "Avita", "infinix": "Infinix",
+            "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹25K", 0, 25000], ["₹25K-35K", 25000, 35000],
+            ["₹35K-50K", 35000, 50000], ["₹50K-70K", 50000, 70000],
+            ["₹70K-1L", 70000, 100000], ["Above ₹1L", 100000, 300000]
+        ],
+        "discounts": [["10%+", 10], ["20%+", 20], ["30%+", 30]]
+    },
+    "audio": {
+        "name": "🎧 Audio",
+        "store": "flipkart",
+        "search": "headphones earphones",
+        "brands": {
+            "boat": "boAt", "noise": "Noise", "jbl": "JBL",
+            "sony": "Sony", "oneplus": "OnePlus", "realme": "Realme",
+            "samsung": "Samsung", "apple": "Apple AirPods", "zebronics": "Zebronics",
+            "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹500", 0, 500], ["₹500-1K", 500, 1000],
+            ["₹1K-2K", 1000, 2000], ["₹2K-5K", 2000, 5000],
+            ["₹5K-10K", 5000, 10000], ["Above ₹10K", 10000, 50000]
+        ],
+        "discounts": [["20%+", 20], ["30%+", 30], ["40%+", 40], ["50%+", 50]]
+    },
+    "smartwatches": {
+        "name": "⌚ Smartwatches",
+        "store": "flipkart",
+        "search": "smartwatches",
+        "brands": {
+            "noise": "Noise", "fire-boltt": "Fire-Boltt", "boat": "boAt",
+            "samsung": "Samsung", "apple": "Apple Watch", "amazfit": "Amazfit",
+            "realme": "Realme", "oneplus": "OnePlus", "titan": "Titan",
+            "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹1K", 0, 1000], ["₹1K-2K", 1000, 2000],
+            ["₹2K-5K", 2000, 5000], ["₹5K-10K", 5000, 10000],
+            ["₹10K-20K", 10000, 20000], ["Above ₹20K", 20000, 100000]
+        ],
+        "discounts": [["20%+", 20], ["30%+", 30], ["40%+", 40], ["50%+", 50]]
+    },
+    "mens-tshirts": {
+        "name": "👔 Men's T-Shirts",
+        "store": "myntra",
+        "search": "men-tshirts",
+        "brands": {
+            "puma": "Puma", "nike": "Nike", "adidas": "Adidas",
+            "levis": "Levis", "hrx": "HRX", "us-polo": "US Polo",
+            "roadster": "Roadster", "here-now": "HERE&NOW", "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹300", 0, 300], ["₹300-500", 300, 500],
+            ["₹500-800", 500, 800], ["₹800-1.2K", 800, 1200],
+            ["₹1.2K-2K", 1200, 2000], ["Above ₹2K", 2000, 10000]
+        ],
+        "discounts": [["30%+", 30], ["40%+", 40], ["50%+", 50], ["60%+", 60]]
+    },
+    "mens-shirts": {
+        "name": "👕 Men's Shirts",
+        "store": "myntra",
+        "search": "men-shirts",
+        "brands": {
+            "levis": "Levis", "louis-philippe": "Louis Philippe", "peter-england": "Peter England",
+            "van-heusen": "Van Heusen", "allen-solly": "Allen Solly", "us-polo": "US Polo",
+            "roadster": "Roadster", "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹500", 0, 500], ["₹500-800", 500, 800],
+            ["₹800-1.2K", 800, 1200], ["₹1.2K-2K", 1200, 2000],
+            ["₹2K-3K", 2000, 3000], ["Above ₹3K", 3000, 15000]
+        ],
+        "discounts": [["30%+", 30], ["40%+", 40], ["50%+", 50], ["60%+", 60]]
+    },
+    "womens-dresses": {
+        "name": "👗 Women's Dresses",
+        "store": "myntra",
+        "search": "women-dresses",
+        "brands": {
+            "only": "ONLY", "zara": "Zara", "hm": "H&M",
+            "mango": "Mango", "forever-21": "Forever 21", "vero-moda": "Vero Moda",
+            "sassafras": "SASSAFRAS", "athena": "Athena", "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹500", 0, 500], ["₹500-1K", 500, 1000],
+            ["₹1K-1.5K", 1000, 1500], ["₹1.5K-2K", 1500, 2000],
+            ["₹2K-3K", 2000, 3000], ["Above ₹3K", 3000, 20000]
+        ],
+        "discounts": [["30%+", 30], ["40%+", 40], ["50%+", 50], ["60%+", 60], ["70%+", 70]]
+    },
+    "womens-kurtis": {
+        "name": "🥻 Kurtis & Suits",
+        "store": "myntra",
+        "search": "kurtas-kurtis-suits",
+        "brands": {
+            "biba": "BIBA", "w": "W", "libas": "Libas",
+            "aurelia": "Aurelia", "anouk": "Anouk", "rangmanch": "Rangmanch",
+            "sangria": "Sangria", "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹400", 0, 400], ["₹400-700", 400, 700],
+            ["₹700-1K", 700, 1000], ["₹1K-1.5K", 1000, 1500],
+            ["₹1.5K-2.5K", 1500, 2500], ["Above ₹2.5K", 2500, 15000]
+        ],
+        "discounts": [["30%+", 30], ["40%+", 40], ["50%+", 50], ["60%+", 60], ["70%+", 70]]
+    },
+    "womens-sarees": {
+        "name": "🪭 Sarees",
+        "store": "myntra",
+        "search": "sarees",
+        "brands": {
+            "saree-mall": "Saree Mall", "mimosa": "Mimosa", "satrani": "Satrani",
+            "kalini": "Kalini", "ishin": "Ishin", "inddus": "Inddus",
+            "suta": "Suta", "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹500", 0, 500], ["₹500-1K", 500, 1000],
+            ["₹1K-2K", 1000, 2000], ["₹2K-3K", 2000, 3000],
+            ["₹3K-5K", 3000, 5000], ["Above ₹5K", 5000, 50000]
+        ],
+        "discounts": [["30%+", 30], ["40%+", 40], ["50%+", 50], ["60%+", 60], ["70%+", 70]]
+    },
+    "shoes-men": {
+        "name": "👟 Men's Shoes",
+        "store": "myntra",
+        "search": "men-sports-shoes",
+        "brands": {
+            "nike": "Nike", "adidas": "Adidas", "puma": "Puma",
+            "reebok": "Reebok", "skechers": "Skechers", "campus": "Campus",
+            "hrx": "HRX", "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹1K", 0, 1000], ["₹1K-2K", 1000, 2000],
+            ["₹2K-3K", 2000, 3000], ["₹3K-5K", 3000, 5000],
+            ["₹5K-8K", 5000, 8000], ["Above ₹8K", 8000, 30000]
+        ],
+        "discounts": [["20%+", 20], ["30%+", 30], ["40%+", 40], ["50%+", 50]]
+    },
+    "shoes-women": {
+        "name": "👠 Women's Shoes",
+        "store": "myntra",
+        "search": "women-heels",
+        "brands": {
+            "metro": "Metro", "inc-5": "Inc.5", "mochi": "Mochi",
+            "catwalk": "Catwalk", "aldo": "Aldo", "steve-madden": "Steve Madden",
+            "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹800", 0, 800], ["₹800-1.5K", 800, 1500],
+            ["₹1.5K-2.5K", 1500, 2500], ["₹2.5K-4K", 2500, 4000],
+            ["₹4K-6K", 4000, 6000], ["Above ₹6K", 6000, 25000]
+        ],
+        "discounts": [["20%+", 20], ["30%+", 30], ["40%+", 40], ["50%+", 50]]
+    },
+    "beauty": {
+        "name": "💄 Beauty",
+        "store": "myntra",
+        "search": "beauty-and-personal-care",
+        "brands": {
+            "maybelline": "Maybelline", "lakme": "Lakme", "loreal": "L'Oreal",
+            "mac": "MAC", "nykaa": "Nykaa", "sugar": "Sugar",
+            "mamaearth": "Mamaearth", "all": "All Brands"
+        },
+        "prices": [
+            ["Under ₹200", 0, 200], ["₹200-400", 200, 400],
+            ["₹400-700", 400, 700], ["₹700-1.2K", 700, 1200],
+            ["₹1.2K-2K", 1200, 2000], ["Above ₹2K", 2000, 10000]
+        ],
+        "discounts": [["20%+", 20], ["30%+", 30], ["40%+", 40], ["50%+", 50]]
+    }
+};
+
+// Store icons
+const STORE_ICONS = {
+    flipkart: "🛒",
+    myntra: "👗",
+    ajio: "🎯"
+};
+
+// Wizard state
+let wizardState = {
+    category: null,
+    brand: null,
+    brandName: '',
+    priceMin: 0,
+    priceMax: 999999,
+    discount: 0,
+    generatedUrl: ''
+};
+
+// ===== Category Wizard Functions =====
+function initCategoryWizard() {
+    // Tab switching
+    document.querySelectorAll('.cat-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            const section = tab.dataset.tab;
+            document.querySelectorAll('.cat-section').forEach(s => s.classList.remove('active'));
+            document.querySelector(`.cat-section[data-section="${section}"]`).classList.add('active');
+        });
+    });
+    
+    // Category selection
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => selectCategory(btn.dataset.cat));
+    });
+    
+    // Back buttons
+    document.getElementById('backToStep1')?.addEventListener('click', () => goToStep(1));
+    document.getElementById('backToStep2')?.addEventListener('click', () => goToStep(2));
+    document.getElementById('backToStep3')?.addEventListener('click', () => goToStep(3));
+    
+    // Skip discount
+    document.getElementById('skipDiscount')?.addEventListener('click', () => {
+        wizardState.discount = 0;
+        showResult();
+    });
+    
+    // New search
+    document.getElementById('newSearchBtn')?.addEventListener('click', resetWizard);
+    
+    // Copy link
+    document.getElementById('resultCopyBtn')?.addEventListener('click', () => {
+        if (wizardState.generatedUrl) {
+            navigator.clipboard.writeText(wizardState.generatedUrl).then(() => {
+                const btn = document.getElementById('resultCopyBtn');
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => btn.textContent = '📋 Copy Link', 2000);
+            });
+        }
+    });
+}
+
+function selectCategory(catId) {
+    const cat = CATEGORIES[catId];
+    if (!cat) return;
+    
+    wizardState.category = catId;
+    
+    // Update progress
+    updateProgress(2);
+    
+    // Populate brands
+    const brandGrid = document.getElementById('brandGrid');
+    brandGrid.innerHTML = '';
+    
+    for (const [brandId, brandName] of Object.entries(cat.brands)) {
+        const btn = document.createElement('button');
+        btn.className = 'brand-btn' + (brandId === 'all' ? ' all' : '');
+        btn.textContent = brandName;
+        btn.onclick = () => selectBrand(brandId, brandName);
+        brandGrid.appendChild(btn);
+    }
+    
+    document.getElementById('brandTitle').textContent = `🏷️ Select Brand for ${cat.name}`;
+    goToStep(2);
+}
+
+function selectBrand(brandId, brandName) {
+    wizardState.brand = brandId;
+    wizardState.brandName = brandId === 'all' ? '' : brandName;
+    
+    updateProgress(3);
+    
+    const cat = CATEGORIES[wizardState.category];
+    const priceGrid = document.getElementById('priceGrid');
+    priceGrid.innerHTML = '';
+    
+    for (const [label, min, max] of cat.prices) {
+        const btn = document.createElement('button');
+        btn.className = 'price-btn';
+        btn.textContent = label;
+        btn.onclick = () => selectPrice(min, max);
+        priceGrid.appendChild(btn);
+    }
+    
+    goToStep(3);
+}
+
+function selectPrice(min, max) {
+    wizardState.priceMin = min;
+    wizardState.priceMax = max;
+    
+    updateProgress(4);
+    
+    const cat = CATEGORIES[wizardState.category];
+    const discountGrid = document.getElementById('discountGrid');
+    discountGrid.innerHTML = '';
+    
+    for (const [label, discount] of cat.discounts) {
+        const btn = document.createElement('button');
+        btn.className = 'discount-btn';
+        btn.textContent = `🏷️ ${label} Off`;
+        btn.onclick = () => {
+            wizardState.discount = discount;
+            showResult();
+        };
+        discountGrid.appendChild(btn);
+    }
+    
+    goToStep(4);
+}
+
+async function showResult() {
+    const cat = CATEGORIES[wizardState.category];
+    const store = cat.store;
+    
+    // Generate the link via API
+    const link = await generateDirectLink(store, cat.search, {
+        brand: wizardState.brandName,
+        price_min: wizardState.priceMin,
+        price_max: wizardState.priceMax,
+        discount: wizardState.discount
+    });
+    
+    if (link) {
+        wizardState.generatedUrl = link;
+    } else {
+        // Fallback URL
+        wizardState.generatedUrl = store === 'flipkart' 
+            ? `https://www.flipkart.com/search?q=${encodeURIComponent(cat.search)}`
+            : `https://www.myntra.com/${cat.search}`;
+    }
+    
+    // Build summary
+    const summary = document.getElementById('resultSummary');
+    let html = `<p><span>📦 Category:</span> ${cat.name}</p>`;
+    if (wizardState.brandName) {
+        html += `<p><span>🏷️ Brand:</span> ${wizardState.brandName}</p>`;
+    }
+    if (wizardState.priceMax < 999999) {
+        html += `<p><span>💰 Price:</span> ₹${wizardState.priceMin.toLocaleString()} - ₹${wizardState.priceMax.toLocaleString()}</p>`;
+    }
+    if (wizardState.discount > 0) {
+        html += `<p><span>🏷️ Discount:</span> ${wizardState.discount}%+ off</p>`;
+    }
+    html += `<p><span>🏪 Store:</span> <span class="store-name">${store.charAt(0).toUpperCase() + store.slice(1)}</span></p>`;
+    summary.innerHTML = html;
+    
+    // Update button
+    document.getElementById('shopNowBtn').href = wizardState.generatedUrl;
+    document.getElementById('shopNowIcon').textContent = STORE_ICONS[store] || '🛒';
+    document.getElementById('shopNowStore').textContent = store.charAt(0).toUpperCase() + store.slice(1);
+    
+    // Hide all steps, show result
+    document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('wizardResult').classList.add('active');
+    
+    // Update progress to completed
+    document.querySelectorAll('.progress-step').forEach(s => s.classList.add('completed'));
+}
+
+function goToStep(step) {
+    document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+    document.getElementById(`wizardStep${step}`).classList.add('active');
+}
+
+function updateProgress(activeStep) {
+    document.querySelectorAll('.progress-step').forEach(step => {
+        const stepNum = parseInt(step.dataset.step);
+        step.classList.remove('active', 'completed');
+        if (stepNum < activeStep) step.classList.add('completed');
+        if (stepNum === activeStep) step.classList.add('active');
+    });
+}
+
+function resetWizard() {
+    wizardState = {
+        category: null,
+        brand: null,
+        brandName: '',
+        priceMin: 0,
+        priceMax: 999999,
+        discount: 0,
+        generatedUrl: ''
+    };
+    
+    document.querySelectorAll('.progress-step').forEach((s, i) => {
+        s.classList.remove('active', 'completed');
+        if (i === 0) s.classList.add('active');
+    });
+    
+    document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('wizardStep1').classList.add('active');
+}
+
 // Generate direct store link with filters (same as bot)
 async function generateDirectLink(store, query, filters = {}) {
     try {
@@ -1497,4 +1915,5 @@ function addShareModalStyles() {
 // Initialize link generator when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     initLinkGenerator();
+    initCategoryWizard();
 });
