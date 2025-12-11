@@ -664,7 +664,6 @@ function selectBrand(brandId, brandName) {
     
     updateProgress(3);
     
-    const cat = CATEGORIES[wizardState.category];
     const priceGrid = document.getElementById('priceGrid');
     priceGrid.innerHTML = '';
     
