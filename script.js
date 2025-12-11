@@ -1,6 +1,84 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
+// ===== API Request Manager (Prevent loops & cache) =====
+const APIManager = {
+    cache: new Map(),
+    pendingRequests: new Map(),
+    CACHE_TTL: 5 * 60 * 1000, // 5 minutes cache
+    
+    // Get cached response or null
+    getCache(key) {
+        const cached = this.cache.get(key);
+        if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+            return cached.data;
+        }
+        this.cache.delete(key);
+        return null;
+    },
+    
+    // Set cache
+    setCache(key, data) {
+        this.cache.set(key, { data, timestamp: Date.now() });
+        // Limit cache size
+        if (this.cache.size > 50) {
+            const oldest = this.cache.keys().next().value;
+            this.cache.delete(oldest);
+        }
+    },
+    
+    // Fetch with deduplication and caching
+    async fetch(url, options = {}) {
+        const cacheKey = url + JSON.stringify(options);
+        
+        // Check cache first
+        const cached = this.getCache(cacheKey);
+        if (cached) return cached;
+        
+        // Check if request already pending
+        if (this.pendingRequests.has(cacheKey)) {
+            return this.pendingRequests.get(cacheKey);
+        }
+        
+        // Create new request
+        const requestPromise = (async () => {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: AbortSignal.timeout(10000) // 10s timeout
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                this.setCache(cacheKey, data);
+                return data;
+            } finally {
+                this.pendingRequests.delete(cacheKey);
+            }
+        })();
+        
+        this.pendingRequests.set(cacheKey, requestPromise);
+        return requestPromise;
+    },
+    
+    // Clear all cache
+    clearCache() {
+        this.cache.clear();
+    }
+};
+
+// ===== Debounce utility =====
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // ===== Guest Search Limit =====
 const GUEST_SEARCH_LIMIT = 3;
 const STORAGE_KEY_SEARCHES = 'smartdeals_guest_searches';
@@ -858,14 +936,9 @@ async function generateDirectLink(store, query, filters = {}) {
             color: Security.sanitizeInput(filters.color || '')
         });
         
-        const response = await fetch(`${API_BASE}/generate-link?${params.toString()}`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
+        // Use cached API manager
+        const data = await APIManager.fetch(`${API_BASE}/generate-link?${params.toString()}`);
         
-        if (!response.ok) throw new Error('API request failed');
-        
-        const data = await response.json();
         if (data.success && data.affiliate_url) {
             return data.affiliate_url;
         }
@@ -941,15 +1014,20 @@ async function loadDealOfDay() {
     dealSection.style.display = 'block';
     
     try {
-        const response = await fetch(`${API_BASE}/deals?limit=5&min_discount=60`);
-        if (!response.ok) throw new Error('Failed to fetch deals');
-        
-        const data = await response.json();
+        // Use cached deals API (same endpoint as loadTopDeals for efficiency)
+        const data = await APIManager.fetch(`${API_BASE}/deals?limit=8`);
         if (data.deals && data.deals.length > 0) {
-            // Pick a random hot deal
-            const randomDeal = data.deals[Math.floor(Math.random() * data.deals.length)];
-            displayDealOfDay(randomDeal);
-            dealOfDayLoaded = true;
+            // Filter high discount deals and pick random
+            const hotDeals = data.deals.filter(d => d.discount >= 50);
+            if (hotDeals.length > 0) {
+                const randomDeal = hotDeals[Math.floor(Math.random() * hotDeals.length)];
+                displayDealOfDay(randomDeal);
+                dealOfDayLoaded = true;
+            } else {
+                dealSection.style.display = 'none';
+            }
+        } else {
+            dealSection.style.display = 'none';
         }
     } catch (error) {
         console.log('Could not load deal of day:', error);
@@ -1504,9 +1582,7 @@ async function searchProducts() {
     saveSearchHistory(searchQuery, { platform, category, minDiscount });
 
     try {
-        const response = await fetch(`${API_BASE}/search?${params.toString()}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+        const data = await APIManager.fetch(`${API_BASE}/search?${params.toString()}`);
         
         // Always show direct link option when platform is selected
         const filters = {
@@ -1912,23 +1988,25 @@ function clearFilters() {
 }
 
 // ===== Load Top Deals =====
-async function loadTopDeals() {
+async function loadTopDeals(forceRefresh = false) {
     // Prevent duplicate calls
     if (isLoadingDeals) return;
+    
+    // If already loaded and not forcing refresh, just display cached
+    if (dealsLoaded && !forceRefresh) {
+        return;
+    }
     
     isLoadingDeals = true;
     
     try {
-        const response = await fetch(`${API_BASE}/deals?limit=8`);
-        if (response.ok) {
-            const data = await response.json();
-            if (data.deals && data.deals.length > 0) {
-                initialState.style.display = "none";
-                resultsHeader.style.display = "block";
-                resultsCount.textContent = "🔥 Top Deals for You";
-                productsGrid.innerHTML = data.deals.map(product => createProductCard(product)).join("");
-                dealsLoaded = true;
-            }
+        const data = await APIManager.fetch(`${API_BASE}/deals?limit=8`);
+        if (data.deals && data.deals.length > 0) {
+            initialState.style.display = "none";
+            resultsHeader.style.display = "block";
+            resultsCount.textContent = "🔥 Top Deals for You";
+            productsGrid.innerHTML = data.deals.map(product => createProductCard(product)).join("");
+            dealsLoaded = true;
         } else {
             initialState.style.display = "block";
         }
