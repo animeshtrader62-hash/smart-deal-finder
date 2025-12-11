@@ -1,6 +1,66 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
+// ===== Security Utilities =====
+const Security = {
+    // Sanitize user input to prevent XSS
+    sanitizeInput(input) {
+        if (!input || typeof input !== 'string') return '';
+        return input
+            .replace(/[<>"'&]/g, '')
+            .replace(/javascript:/gi, '')
+            .replace(/on\w+=/gi, '')
+            .trim()
+            .slice(0, 500); // Max length limit
+    },
+    
+    // Escape HTML entities for display
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    },
+    
+    // Validate URL - only allow https and specific domains
+    isValidUrl(url) {
+        if (!url || typeof url !== 'string') return false;
+        try {
+            const parsed = new URL(url);
+            const allowedDomains = ['flipkart.com', 'myntra.com', 'ajio.com', 'amazon.in', 'ekaro.in'];
+            return parsed.protocol === 'https:' && 
+                   allowedDomains.some(d => parsed.hostname.endsWith(d));
+        } catch {
+            return false;
+        }
+    },
+    
+    // Validate category ID against known categories
+    isValidCategory(catId) {
+        return catId && typeof catId === 'string' && CATEGORIES.hasOwnProperty(catId);
+    },
+    
+    // Validate numeric input
+    isValidNumber(val, min = 0, max = 999999) {
+        const num = parseInt(val);
+        return !isNaN(num) && num >= min && num <= max;
+    },
+    
+    // Rate limiting for client-side actions
+    rateLimiter: {
+        actions: {},
+        check(action, maxPerMinute = 30) {
+            const now = Date.now();
+            if (!this.actions[action]) this.actions[action] = [];
+            // Clean old entries
+            this.actions[action] = this.actions[action].filter(t => now - t < 60000);
+            if (this.actions[action].length >= maxPerMinute) return false;
+            this.actions[action].push(now);
+            return true;
+        }
+    }
+};
+
 // ===== CATEGORIES DATA (Same as Telegram Bot) =====
 const CATEGORIES = {
     "smartphones": {
@@ -215,7 +275,6 @@ const ELECTRONICS_ONLY = ["smartphones", "laptops", "audio", "smartwatches"];
 
 // Fashion categories - Available on BOTH Flipkart & Myntra
 const FASHION_DUAL_STORE = ["mens-tshirts", "mens-shirts", "womens-dresses", "womens-kurtis", "womens-sarees", "shoes-men", "shoes-women", "beauty"];
-};
 
 // Wizard state
 let wizardState = {
@@ -274,9 +333,13 @@ function initCategoryWizard() {
 }
 
 function selectCategory(catId) {
-    const cat = CATEGORIES[catId];
-    if (!cat) return;
+    // Security: Validate category ID
+    if (!Security.isValidCategory(catId)) {
+        console.warn('Invalid category attempted:', catId);
+        return;
+    }
     
+    const cat = CATEGORIES[catId];
     wizardState.category = catId;
     
     // Update progress
@@ -299,8 +362,15 @@ function selectCategory(catId) {
 }
 
 function selectBrand(brandId, brandName) {
+    // Security: Validate brand exists in current category
+    const cat = CATEGORIES[wizardState.category];
+    if (!cat || !cat.brands || !cat.brands.hasOwnProperty(brandId)) {
+        console.warn('Invalid brand attempted:', brandId);
+        return;
+    }
+    
     wizardState.brand = brandId;
-    wizardState.brandName = brandId === 'all' ? '' : brandName;
+    wizardState.brandName = brandId === 'all' ? '' : Security.sanitizeInput(brandName);
     
     updateProgress(3);
     
@@ -320,8 +390,14 @@ function selectBrand(brandId, brandName) {
 }
 
 function selectPrice(min, max) {
-    wizardState.priceMin = min;
-    wizardState.priceMax = max;
+    // Security: Validate price values
+    if (!Security.isValidNumber(min, 0, 9999999) || !Security.isValidNumber(max, 0, 9999999)) {
+        console.warn('Invalid price range attempted:', min, max);
+        return;
+    }
+    
+    wizardState.priceMin = parseInt(min);
+    wizardState.priceMax = parseInt(max);
     
     updateProgress(4);
     
@@ -530,15 +606,28 @@ function resetWizard() {
 
 // Generate direct store link with filters (same as bot)
 async function generateDirectLink(store, query, filters = {}) {
+    // Security: Rate limit link generation
+    if (!Security.rateLimiter.check('generateLink', 15)) {
+        showError('Too many requests. Please wait.');
+        return null;
+    }
+    
+    // Security: Validate store
+    const validStores = ['flipkart', 'myntra', 'ajio'];
+    if (!validStores.includes(store?.toLowerCase())) {
+        console.warn('Invalid store:', store);
+        store = 'flipkart';
+    }
+    
     try {
         const params = new URLSearchParams({
-            store: store,
-            query: query,
-            brand: filters.brand || '',
-            price_min: filters.price_min || 0,
-            price_max: filters.price_max || 999999,
-            discount: filters.discount || 0,
-            color: filters.color || ''
+            store: store.toLowerCase(),
+            query: Security.sanitizeInput(query) || 'deals',
+            brand: Security.sanitizeInput(filters.brand || ''),
+            price_min: Security.isValidNumber(filters.price_min) ? filters.price_min : 0,
+            price_max: Security.isValidNumber(filters.price_max) ? filters.price_max : 999999,
+            discount: Security.isValidNumber(filters.discount, 0, 100) ? filters.discount : 0,
+            color: Security.sanitizeInput(filters.color || '')
         });
         
         const response = await fetch(`${API_BASE}/generate-link?${params.toString()}`, {
@@ -646,34 +735,49 @@ function displayDealOfDay(deal) {
     const dealContent = document.getElementById('dealContent');
     if (!dealContent) return;
     
+    // Security: Validate deal object
+    if (!deal || !deal.id || !deal.title) {
+        console.warn('Invalid deal object');
+        return;
+    }
+    
     // Cache product for wishlist
     productsCache[deal.id] = deal;
     const isInWishlist = userWishlist.some(p => p.id === deal.id);
     
+    // Security: Validate and sanitize deal data
+    const safeImage = deal.image && /^https:\/\//.test(deal.image) ? deal.image : 'https://via.placeholder.com/300x200?text=Deal';
+    const safeDiscount = Security.isValidNumber(deal.discount, 0, 100) ? deal.discount : 0;
+    const safePrice = Security.isValidNumber(deal.price) ? deal.price : 0;
+    const safeOriginalPrice = Security.isValidNumber(deal.original_price) ? deal.original_price : safePrice;
+    const safePlatform = Security.sanitizeInput(deal.platform) || 'Store';
+    const safeUrl = Security.isValidUrl(deal.affiliate_url) ? deal.affiliate_url : '#';
+    const safeId = Security.sanitizeInput(String(deal.id));
+    
     dealContent.innerHTML = `
         <div class="deal-card">
             <div class="deal-image">
-                <img src="${deal.image}" alt="${escapeHtml(deal.title)}" onerror="this.src='https://via.placeholder.com/300x200?text=Deal'">
-                <span class="deal-badge">🔥 ${deal.discount}% OFF</span>
+                <img src="${safeImage}" alt="${escapeHtml(deal.title)}" onerror="this.src='https://via.placeholder.com/300x200?text=Deal'">
+                <span class="deal-badge">🔥 ${safeDiscount}% OFF</span>
             </div>
             <div class="deal-info">
-                <span class="deal-platform platform-${deal.platform.toLowerCase()}">${deal.platform}</span>
+                <span class="deal-platform platform-${safePlatform.toLowerCase()}">${escapeHtml(safePlatform)}</span>
                 <h3 class="deal-title">${escapeHtml(deal.title)}</h3>
                 <p class="deal-brand">${escapeHtml(deal.brand)}</p>
                 <div class="deal-price">
-                    <span class="current-price">₹${formatPrice(deal.price)}</span>
-                    <span class="original-price">₹${formatPrice(deal.original_price)}</span>
-                    <span class="savings">You save ₹${formatPrice(deal.original_price - deal.price)}</span>
+                    <span class="current-price">₹${formatPrice(safePrice)}</span>
+                    <span class="original-price">₹${formatPrice(safeOriginalPrice)}</span>
+                    <span class="savings">You save ₹${formatPrice(safeOriginalPrice - safePrice)}</span>
                 </div>
                 <div class="deal-timer">
                     <span>⏰ Ends in: </span>
                     <span id="dealTimer">23:59:59</span>
                 </div>
                 <div class="deal-actions">
-                    <a href="${getProductUrl(deal.affiliate_url)}" target="_blank" class="deal-buy-btn">
+                    <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="deal-buy-btn" ${safeUrl === '#' ? 'onclick="return false;"' : ''}>
                         Grab Deal 🛒
                     </a>
-                    <button class="deal-wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="handleWishlistClick('${deal.id}')">
+                    <button class="deal-wishlist-btn ${isInWishlist ? 'active' : ''}" onclick="handleWishlistClick('${safeId}')">
                         ${isInWishlist ? '❤️' : '🤍'}
                     </button>
                 </div>
@@ -775,6 +879,18 @@ async function loadWishlist() {
 async function addToWishlist(product) {
     if (!currentUser) {
         showError("Please login to add to wishlist");
+        return;
+    }
+    
+    // Security: Rate limit wishlist actions
+    if (!Security.rateLimiter.check('wishlist', 30)) {
+        showError('Too many actions. Please wait.');
+        return;
+    }
+    
+    // Security: Validate product object
+    if (!product || !product.id || !product.title) {
+        showError("Invalid product");
         return;
     }
     
@@ -960,16 +1076,16 @@ async function displaySearchHistory() {
         productsGrid.innerHTML = `
             <div class="history-list">
                 ${history.map((item, index) => `
-                    <div class="history-item" onclick="replaySearch(${index})">
+                    <div class="history-item" onclick="replaySearch(${parseInt(index)})">
                         <span class="history-icon">🔍</span>
                         <div class="history-details">
-                            <span class="history-query">${item.query || 'All Products'}</span>
+                            <span class="history-query">${Security.escapeHtml(item.query) || 'All Products'}</span>
                             <span class="history-filters">
-                                ${item.filters.platform ? `Platform: ${item.filters.platform}` : ''}
-                                ${item.filters.category ? `Category: ${item.filters.category}` : ''}
-                                ${item.filters.minDiscount ? `${item.filters.minDiscount}%+ Off` : ''}
+                                ${item.filters.platform ? `Platform: ${Security.escapeHtml(item.filters.platform)}` : ''}
+                                ${item.filters.category ? `Category: ${Security.escapeHtml(item.filters.category)}` : ''}
+                                ${item.filters.minDiscount ? `${parseInt(item.filters.minDiscount) || 0}%+ Off` : ''}
                             </span>
-                            <span class="history-time">${formatTimeAgo(item.timestamp)}</span>
+                            <span class="history-time">${Security.escapeHtml(formatTimeAgo(item.timestamp))}</span>
                         </div>
                     </div>
                 `).join('')}
@@ -1110,19 +1226,26 @@ if (categoryInput) {
 
 // ===== Main Search Function =====
 async function searchProducts() {
+    // Security: Rate limit searches
+    if (!Security.rateLimiter.check('search', 20)) {
+        showError('Too many searches. Please wait a moment.');
+        return;
+    }
+    
     showLoading();
     setActiveNav('deals');
 
     const params = new URLSearchParams();
     
-    const searchQuery = document.getElementById('searchQuery')?.value.trim() || '';
-    const platform = platformInput?.value?.trim() || '';
-    const category = categoryInput?.value?.trim() || '';
-    const brand = brandInput?.value?.trim() || '';
-    const minPrice = minPriceInput?.value?.trim() || '';
-    const maxPrice = maxPriceInput?.value?.trim() || '';
-    const minDiscount = minDiscountInput?.value?.trim() || '';
-    const sortBy = sortByInput?.value || '';
+    // Security: Sanitize all inputs
+    const searchQuery = Security.sanitizeInput(document.getElementById('searchQuery')?.value || '');
+    const platform = Security.sanitizeInput(platformInput?.value || '');
+    const category = Security.sanitizeInput(categoryInput?.value || '');
+    const brand = Security.sanitizeInput(brandInput?.value || '');
+    const minPrice = Security.isValidNumber(minPriceInput?.value) ? minPriceInput.value.trim() : '';
+    const maxPrice = Security.isValidNumber(maxPriceInput?.value) ? maxPriceInput.value.trim() : '';
+    const minDiscount = Security.isValidNumber(minDiscountInput?.value, 0, 100) ? minDiscountInput.value.trim() : '';
+    const sortBy = ['price_asc', 'price_desc', 'discount', 'rating', ''].includes(sortByInput?.value) ? sortByInput.value : '';
 
     if (searchQuery) params.append("q", searchQuery);
     if (platform) params.append("platform", platform);
@@ -1250,10 +1373,10 @@ function attachDirectLinkHandler(filters) {
                 discount: filters.discount
             });
             
-            if (link) {
+            if (link && Security.isValidUrl(link)) {
                 // Show the link before opening
                 showGeneratedLinkPopup(link, filters.platform || 'Store', query);
-                window.open(link, '_blank');
+                window.open(link, '_blank', 'noopener,noreferrer');
                 directLinkBtn.querySelector('.btn-text').textContent = '✅ Opened!';
                 setTimeout(() => {
                     directLinkBtn.disabled = false;
@@ -1405,7 +1528,7 @@ function createProductCard(product) {
                     <span class="rating-badge">${product.rating || 4.0} ★</span>
                     <span class="rating-count">(${formatCount(product.reviews || 100)} reviews)</span>
                 </div>
-                <a href="${getProductUrl(product.affiliate_url)}" target="_blank" rel="noopener noreferrer" class="buy-btn">
+                <a href="${Security.isValidUrl(product.affiliate_url) ? product.affiliate_url : '#'}" target="_blank" rel="noopener noreferrer" class="buy-btn" onclick="return Security.isValidUrl('${product.affiliate_url?.replace(/'/g, "\\'") || ''}')">
                     Buy Now 🛒
                 </a>
             </div>
@@ -1413,10 +1536,9 @@ function createProductCard(product) {
     `;
 }
 
-// Escape HTML to prevent XSS
+// Escape HTML to prevent XSS (wrapper for Security.escapeHtml)
 function escapeHtml(text) {
-    if (!text) return '';
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return Security.escapeHtml(text);
 }
 
 // Handle wishlist click
@@ -1701,9 +1823,23 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (heroSearchBtn) {
         heroSearchBtn.addEventListener('click', async () => {
-            const query = heroSearch?.value.trim() || '';
-            if (!query) {
-                showError('Please enter a search term');
+            // Security: Sanitize and validate hero search input
+            const rawQuery = heroSearch?.value || '';
+            const query = Security.sanitizeInput(rawQuery);
+            
+            if (!query || query.length < 2) {
+                showError('Please enter a valid search term (min 2 characters)');
+                return;
+            }
+            
+            if (query.length > 100) {
+                showError('Search term too long');
+                return;
+            }
+            
+            // Security: Rate limit hero searches
+            if (!Security.rateLimiter.check('heroSearch', 10)) {
+                showError('Too many searches. Please wait.');
                 return;
             }
             

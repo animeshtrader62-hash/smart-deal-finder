@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Smart Deal Finder</title>
     <meta name="theme-color" content="#0a0a0f">
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -634,10 +638,30 @@
         // Login Form Submit
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            showLoading();
             
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
+            
+            // Security: Input validation
+            if (!email || !password) {
+                showError('Please fill in all fields.');
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please enter a valid email address.');
+                return;
+            }
+            
+            // Password minimum length
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters.');
+                return;
+            }
+            
+            showLoading();
             
             try {
                 await auth.signInWithEmailAndPassword(email, password);
@@ -654,6 +678,8 @@
                     errorMsg = 'Incorrect password.';
                 } else if (error.code === 'auth/invalid-email') {
                     errorMsg = 'Invalid email address.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'Too many attempts. Please try again later.';
                 }
                 showError(errorMsg);
             }
@@ -662,16 +688,44 @@
         // Signup Form Submit
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            showLoading();
             
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
             const password = document.getElementById('signupPassword').value;
+            
+            // Security: Input validation
+            if (!name || !email || !password) {
+                showError('Please fill in all fields.');
+                return;
+            }
+            
+            // Name validation - only allow letters, spaces, and common characters
+            if (!/^[a-zA-Z\s'-]{2,50}$/.test(name)) {
+                showError('Please enter a valid name (2-50 characters).');
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Please enter a valid email address.');
+                return;
+            }
+            
+            // Password strength check
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters.');
+                return;
+            }
+            
+            showLoading();
             
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                // Sanitize name before saving
+                const sanitizedName = name.replace(/[<>"'&]/g, '');
                 await userCredential.user.updateProfile({
-                    displayName: name
+                    displayName: sanitizedName
                 });
                 showSuccess('Account created successfully!');
                 setTimeout(() => {
@@ -686,6 +740,8 @@
                     errorMsg = 'Password should be at least 6 characters.';
                 } else if (error.code === 'auth/invalid-email') {
                     errorMsg = 'Invalid email address.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'Too many attempts. Please try again later.';
                 }
                 showError(errorMsg);
             }
