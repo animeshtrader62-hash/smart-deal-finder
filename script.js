@@ -894,8 +894,8 @@ async function replaySearch(index) {
 }
 
 // ===== Event Listeners =====
-searchBtn.addEventListener("click", searchProducts);
-clearBtn.addEventListener("click", clearFilters);
+if (searchBtn) searchBtn.addEventListener("click", searchProducts);
+if (clearBtn) clearBtn.addEventListener("click", clearFilters);
 
 quickBtns.forEach(btn => {
     btn.addEventListener("click", async () => {
@@ -904,11 +904,11 @@ quickBtns.forEach(btn => {
         
         btn.classList.toggle("active");
         
-        if (filterType === "platform") {
+        if (filterType === "platform" && platformInput) {
             platformInput.value = btn.classList.contains("active") ? filterValue : "";
-        } else if (filterType === "category") {
+        } else if (filterType === "category" && categoryInput) {
             categoryInput.value = btn.classList.contains("active") ? filterValue : "";
-        } else if (filterType === "discount") {
+        } else if (filterType === "discount" && minDiscountInput) {
             minDiscountInput.value = btn.classList.contains("active") ? filterValue : "";
         }
         
@@ -917,8 +917,8 @@ quickBtns.forEach(btn => {
         // For quick buttons with specific filters, offer direct link
         if (btn.classList.contains("active") && filterType === "discount" && filterValue >= 50) {
             // Show direct link for hot deals
-            const store = platformInput.value || 'Flipkart';
-            const query = categoryInput.value || 'all';
+            const store = platformInput?.value || 'Flipkart';
+            const query = categoryInput?.value || 'all';
             
             showSuccess(`🔥 Generating ${filterValue}%+ off deals...`);
             
@@ -1007,13 +1007,13 @@ async function searchProducts() {
     const params = new URLSearchParams();
     
     const searchQuery = document.getElementById('searchQuery')?.value.trim() || '';
-    const platform = platformInput.value.trim();
-    const category = categoryInput.value.trim();
-    const brand = brandInput.value.trim();
-    const minPrice = minPriceInput.value.trim();
-    const maxPrice = maxPriceInput.value.trim();
-    const minDiscount = minDiscountInput.value.trim();
-    const sortBy = sortByInput.value;
+    const platform = platformInput?.value?.trim() || '';
+    const category = categoryInput?.value?.trim() || '';
+    const brand = brandInput?.value?.trim() || '';
+    const minPrice = minPriceInput?.value?.trim() || '';
+    const maxPrice = maxPriceInput?.value?.trim() || '';
+    const minDiscount = minDiscountInput?.value?.trim() || '';
+    const sortBy = sortByInput?.value || '';
 
     if (searchQuery) params.append("q", searchQuery);
     if (platform) params.append("platform", platform);
@@ -1384,23 +1384,23 @@ function setActiveNav(page) {
 }
 
 function clearFilters() {
-    platformInput.value = "";
-    categoryInput.value = "";
-    brandInput.value = "";
-    minPriceInput.value = "";
-    maxPriceInput.value = "";
-    minDiscountInput.value = "";
-    sortByInput.value = "";
+    if (platformInput) platformInput.value = "";
+    if (categoryInput) categoryInput.value = "";
+    if (brandInput) brandInput.value = "";
+    if (minPriceInput) minPriceInput.value = "";
+    if (maxPriceInput) maxPriceInput.value = "";
+    if (minDiscountInput) minDiscountInput.value = "";
+    if (sortByInput) sortByInput.value = "";
     
     const searchQuery = document.getElementById('searchQuery');
     if (searchQuery) searchQuery.value = "";
 
     quickBtns.forEach(btn => btn.classList.remove("active"));
     
-    productsGrid.innerHTML = "";
-    resultsHeader.style.display = "none";
-    noResults.style.display = "none";
-    initialState.style.display = "block";
+    if (productsGrid) productsGrid.innerHTML = "";
+    if (resultsHeader) resultsHeader.style.display = "none";
+    if (noResults) noResults.style.display = "none";
+    if (initialState) initialState.style.display = "block";
 }
 
 // ===== Load Top Deals =====
