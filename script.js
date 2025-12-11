@@ -1,6 +1,211 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
+// ===== Guest Search Limit =====
+const GUEST_SEARCH_LIMIT = 3;
+const STORAGE_KEY_SEARCHES = 'smartdeals_guest_searches';
+const STORAGE_KEY_DATE = 'smartdeals_search_date';
+
+// Track guest searches
+const GuestLimit = {
+    getSearchCount() {
+        try {
+            const today = new Date().toDateString();
+            const storedDate = localStorage.getItem(STORAGE_KEY_DATE);
+            
+            // Reset count if it's a new day
+            if (storedDate !== today) {
+                localStorage.setItem(STORAGE_KEY_DATE, today);
+                localStorage.setItem(STORAGE_KEY_SEARCHES, '0');
+                return 0;
+            }
+            
+            return parseInt(localStorage.getItem(STORAGE_KEY_SEARCHES) || '0');
+        } catch (e) {
+            return 0; // localStorage may be blocked
+        }
+    },
+    
+    incrementCount() {
+        try {
+            const count = this.getSearchCount() + 1;
+            localStorage.setItem(STORAGE_KEY_SEARCHES, count.toString());
+            return count;
+        } catch (e) {
+            return 0;
+        }
+    },
+    
+    canSearch() {
+        // Logged in users have unlimited searches
+        if (typeof currentUser !== 'undefined' && currentUser) return true;
+        return this.getSearchCount() < GUEST_SEARCH_LIMIT;
+    },
+    
+    getRemainingSearches() {
+        if (typeof currentUser !== 'undefined' && currentUser) return Infinity;
+        return Math.max(0, GUEST_SEARCH_LIMIT - this.getSearchCount());
+    },
+    
+    showLoginPrompt() {
+        // Remove existing popup if any
+        const existing = document.querySelector('.login-prompt-overlay');
+        if (existing) existing.remove();
+        
+        const popup = document.createElement('div');
+        popup.className = 'login-prompt-overlay';
+        popup.innerHTML = `
+            <div class="login-prompt-modal">
+                <div class="login-prompt-icon">🔒</div>
+                <h2>Login Required</h2>
+                <p class="login-prompt-subtitle">You've used your ${GUEST_SEARCH_LIMIT} free searches for today!</p>
+                <div class="login-prompt-benefits">
+                    <div class="benefit-item">✅ Unlimited searches</div>
+                    <div class="benefit-item">❤️ Save to wishlist</div>
+                    <div class="benefit-item">🕐 Search history</div>
+                    <div class="benefit-item">🔥 Exclusive deals</div>
+                </div>
+                <a href="login.html" class="login-prompt-btn primary">
+                    <span>🚀</span> Login / Sign Up Free
+                </a>
+                <button class="login-prompt-btn secondary" id="closeLoginPrompt">
+                    Maybe Later
+                </button>
+                <p class="login-prompt-note">Free searches reset daily at midnight</p>
+            </div>
+        `;
+        
+        document.body.appendChild(popup);
+        
+        // Close handlers
+        document.getElementById('closeLoginPrompt').onclick = () => popup.remove();
+        popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
+        
+        // Add styles
+        addLoginPromptStyles();
+    }
+};
+
+// Add login prompt styles
+function addLoginPromptStyles() {
+    if (document.getElementById('login-prompt-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'login-prompt-styles';
+    style.textContent = `
+        .login-prompt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+        .login-prompt-modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 80px rgba(99, 102, 241, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .login-prompt-icon {
+            font-size: 60px;
+            margin-bottom: 16px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .login-prompt-modal h2 {
+            color: #fff;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .login-prompt-subtitle {
+            color: #ff6b6b;
+            font-size: 16px;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+        .login-prompt-benefits {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .benefit-item {
+            background: rgba(99, 102, 241, 0.15);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #a5b4fc;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: left;
+        }
+        .login-prompt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-bottom: 12px;
+            border: none;
+        }
+        .login-prompt-btn.primary {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+        }
+        .login-prompt-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(99, 102, 241, 0.5);
+        }
+        .login-prompt-btn.secondary {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        .login-prompt-btn.secondary:hover {
+            background: rgba(148, 163, 184, 0.1);
+            color: #fff;
+        }
+        .login-prompt-note {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 16px;
+        }
+        @media (max-width: 480px) {
+            .login-prompt-modal { padding: 28px 20px; }
+            .login-prompt-modal h2 { font-size: 22px; }
+            .login-prompt-benefits { grid-template-columns: 1fr; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 // ===== Security Utilities =====
 const Security = {
     // Sanitize user input to prevent XSS
@@ -37,7 +242,10 @@ const Security = {
     
     // Validate category ID against known categories
     isValidCategory(catId) {
-        return catId && typeof catId === 'string' && CATEGORIES.hasOwnProperty(catId);
+        // Check if CATEGORIES exists and catId is valid
+        return catId && typeof catId === 'string' && 
+               typeof CATEGORIES !== 'undefined' && 
+               Object.prototype.hasOwnProperty.call(CATEGORIES, catId);
     },
     
     // Validate numeric input
@@ -420,7 +628,27 @@ function selectPrice(min, max) {
 }
 
 async function showResult() {
+    // Check guest search limit
+    if (!GuestLimit.canSearch()) {
+        GuestLimit.showLoginPrompt();
+        return;
+    }
+    
+    // Increment search count for guests
+    if (!currentUser) {
+        const count = GuestLimit.incrementCount();
+        const remaining = GuestLimit.getRemainingSearches();
+        if (remaining > 0 && remaining <= 2) {
+            showSearchLimitWarning(remaining);
+        }
+    }
+    
     const cat = CATEGORIES[wizardState.category];
+    if (!cat) {
+        showError('Invalid category selected');
+        return;
+    }
+    
     const isFashion = FASHION_DUAL_STORE.includes(wizardState.category);
     
     // Show loading state
@@ -1226,10 +1454,26 @@ if (categoryInput) {
 
 // ===== Main Search Function =====
 async function searchProducts() {
+    // Check guest search limit FIRST
+    if (!GuestLimit.canSearch()) {
+        GuestLimit.showLoginPrompt();
+        hideLoading();
+        return;
+    }
+    
     // Security: Rate limit searches
     if (!Security.rateLimiter.check('search', 20)) {
         showError('Too many searches. Please wait a moment.');
         return;
+    }
+    
+    // Increment search count for guests
+    if (!currentUser) {
+        const count = GuestLimit.incrementCount();
+        const remaining = GuestLimit.getRemainingSearches();
+        if (remaining > 0 && remaining <= 2) {
+            showSearchLimitWarning(remaining);
+        }
     }
     
     showLoading();
@@ -1603,6 +1847,39 @@ function showSuccess(message) {
     setTimeout(() => toast.remove(), 2000);
 }
 
+// Show warning when running low on free searches
+function showSearchLimitWarning(remaining) {
+    const toast = document.createElement("div");
+    toast.className = "warning-toast";
+    toast.innerHTML = `⚠️ Only <strong>${remaining}</strong> free search${remaining > 1 ? 'es' : ''} left today! <a href="login.html" style="color:#fff;text-decoration:underline;">Login for unlimited</a>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+    
+    // Add warning toast style if not exists
+    if (!document.getElementById('warning-toast-style')) {
+        const style = document.createElement('style');
+        style.id = 'warning-toast-style';
+        style.textContent = `
+            .warning-toast {
+                position: fixed;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                color: white;
+                padding: 14px 24px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 600;
+                z-index: 9999;
+                box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4);
+                animation: slideUp 0.3s ease;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
 function setActiveNav(page) {
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     if (page === 'wishlist') {
@@ -1823,6 +2100,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (heroSearchBtn) {
         heroSearchBtn.addEventListener('click', async () => {
+            // Check guest search limit FIRST
+            if (!GuestLimit.canSearch()) {
+                GuestLimit.showLoginPrompt();
+                return;
+            }
+            
             // Security: Sanitize and validate hero search input
             const rawQuery = heroSearch?.value || '';
             const query = Security.sanitizeInput(rawQuery);
@@ -1841,6 +2124,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!Security.rateLimiter.check('heroSearch', 10)) {
                 showError('Too many searches. Please wait.');
                 return;
+            }
+            
+            // Increment search count for guests
+            if (!currentUser) {
+                const count = GuestLimit.incrementCount();
+                const remaining = GuestLimit.getRemainingSearches();
+                if (remaining > 0 && remaining <= 2) {
+                    showSearchLimitWarning(remaining);
+                }
             }
             
             // Smart detection like bot
