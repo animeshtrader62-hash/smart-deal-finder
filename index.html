@@ -2,18 +2,29 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
     <title>Smart Deal Finder - Best Deals from Flipkart, Myntra & Ajio</title>
     <meta name="description" content="Find the best deals across Flipkart, Myntra, Ajio. Compare prices and save money!">
     <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <!-- Security Headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <link rel="stylesheet" href="style.css?v=2.3">
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="style.css?v=2.4" as="style">
+    <link rel="stylesheet" href="style.css?v=2.4">
+    <!-- Optimized font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Critical inline CSS for instant paint -->
+    <style>
+        body { background: #0a0a0f; }
+        [data-theme="light"] body { background: #f8fafc; }
+    </style>
 </head>
 <body>
     <!-- Floating Background Elements -->
@@ -524,6 +535,6 @@
             document.getElementById('mobileNav')?.classList.toggle('show');
         });
     </script>
-    <script src="script.js?v=3.2"></script>
+    <script src="script.js?v=3.3"></script>
 </body>
 </html>

@@ -1,6 +1,10 @@
 // ===== Configuration =====
 const API_BASE = "https://smart-product-finder-api.onrender.com";
 
+// ===== Mobile Detection & Performance =====
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+const isLowEndDevice = navigator.hardwareConcurrency <= 4 || navigator.deviceMemory <= 4;
+
 // ===== API Request Manager (Prevent loops & cache) =====
 const APIManager = {
     cache: new Map(),
@@ -2020,6 +2024,20 @@ async function loadTopDeals(forceRefresh = false) {
 
 // ===== Initialize =====
 document.addEventListener("DOMContentLoaded", () => {
+    // Mobile performance optimizations
+    if (isMobile || isLowEndDevice) {
+        // Use passive listeners for touch events
+        document.addEventListener('touchstart', () => {}, { passive: true });
+        document.addEventListener('touchmove', () => {}, { passive: true });
+        document.addEventListener('scroll', () => {}, { passive: true });
+        
+        // Reduce animation duration on low-end devices
+        if (isLowEndDevice) {
+            document.documentElement.style.setProperty('--transition-normal', '0.15s ease');
+            document.documentElement.style.setProperty('--transition-slow', '0.25s ease');
+        }
+    }
+    
         // ===== Smart Suggestions for Hero Search =====
         const SUGGESTIONS = {
             smartphones: [
@@ -2078,22 +2096,25 @@ document.addEventListener("DOMContentLoaded", () => {
         // Create suggestion dropdown
         const suggestionBox = document.createElement('div');
         suggestionBox.id = 'heroSuggestionBox';
-        suggestionBox.style.position = 'absolute';
-        suggestionBox.style.top = '60px';
-        suggestionBox.style.left = '0';
-        suggestionBox.style.width = '100%';
-        suggestionBox.style.zIndex = '100';
-        suggestionBox.style.background = 'rgba(30, 30, 40, 0.98)';
-        suggestionBox.style.borderRadius = '16px';
-        suggestionBox.style.boxShadow = '0 8px 32px rgba(99,102,241,0.18)';
-        suggestionBox.style.display = 'none';
-        suggestionBox.style.padding = '12px 0';
-        suggestionBox.style.maxHeight = '320px';
-        suggestionBox.style.overflowY = 'auto';
-        suggestionBox.style.fontSize = '16px';
-        suggestionBox.style.color = '#fff';
-        suggestionBox.style.backdropFilter = 'blur(8px)';
-        suggestionBox.style.border = '1px solid rgba(99,102,241,0.18)';
+        suggestionBox.style.cssText = `
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(30, 30, 40, 0.98);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(99,102,241,0.18);
+            display: none;
+            padding: 12px 0;
+            max-height: ${isMobile ? '260px' : '320px'};
+            overflow-y: auto;
+            font-size: ${isMobile ? '15px' : '16px'};
+            color: #fff;
+            ${isMobile ? '' : 'backdrop-filter: blur(8px);'}
+            border: 1px solid rgba(99,102,241,0.18);
+            -webkit-overflow-scrolling: touch;
+        `;
 
         const heroSearchWrapper = document.querySelector('.hero-search');
         if (heroSearchWrapper) heroSearchWrapper.appendChild(suggestionBox);
