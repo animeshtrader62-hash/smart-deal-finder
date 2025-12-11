@@ -210,6 +210,13 @@ const STORE_ICONS = {
     ajio: "🎯"
 };
 
+// Electronics categories - ONLY Flipkart (not on Myntra)
+const ELECTRONICS_ONLY = ["smartphones", "laptops", "audio", "smartwatches"];
+
+// Fashion categories - Available on BOTH Flipkart & Myntra
+const FASHION_DUAL_STORE = ["mens-tshirts", "mens-shirts", "womens-dresses", "womens-kurtis", "womens-sarees", "shoes-men", "shoes-women", "beauty"];
+};
+
 // Wizard state
 let wizardState = {
     category: null,
@@ -338,7 +345,7 @@ function selectPrice(min, max) {
 
 async function showResult() {
     const cat = CATEGORIES[wizardState.category];
-    const store = cat.store;
+    const isFashion = FASHION_DUAL_STORE.includes(wizardState.category);
     
     // Show loading state
     document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
@@ -347,20 +354,59 @@ async function showResult() {
     const summary = document.getElementById('resultSummary');
     summary.innerHTML = '<p style="text-align:center;">⏳ Generating your personalized link...</p>';
     
-    // Generate the link via API (with fallback)
-    const link = await generateDirectLink(store, cat.search, {
-        brand: wizardState.brandName,
-        price_min: wizardState.priceMin,
-        price_max: wizardState.priceMax,
-        discount: wizardState.discount
-    });
+    // Generate links for the relevant stores
+    let flipkartLink = null;
+    let myntraLink = null;
     
-    wizardState.generatedUrl = link || generateFallbackUrl(store, cat.search, {
-        brand: wizardState.brandName,
-        price_min: wizardState.priceMin,
-        price_max: wizardState.priceMax,
-        discount: wizardState.discount
-    });
+    if (isFashion) {
+        // Generate both Flipkart and Myntra links for fashion
+        const [flipkartResult, myntraResult] = await Promise.all([
+            generateDirectLink('flipkart', cat.search, {
+                brand: wizardState.brandName,
+                price_min: wizardState.priceMin,
+                price_max: wizardState.priceMax,
+                discount: wizardState.discount
+            }),
+            generateDirectLink('myntra', cat.search, {
+                brand: wizardState.brandName,
+                price_min: wizardState.priceMin,
+                price_max: wizardState.priceMax,
+                discount: wizardState.discount
+            })
+        ]);
+        
+        flipkartLink = flipkartResult || generateFallbackUrl('flipkart', cat.search, {
+            brand: wizardState.brandName,
+            price_min: wizardState.priceMin,
+            price_max: wizardState.priceMax,
+            discount: wizardState.discount
+        });
+        
+        myntraLink = myntraResult || generateFallbackUrl('myntra', cat.search, {
+            brand: wizardState.brandName,
+            price_min: wizardState.priceMin,
+            price_max: wizardState.priceMax,
+            discount: wizardState.discount
+        });
+    } else {
+        // Electronics - Flipkart only
+        flipkartLink = await generateDirectLink('flipkart', cat.search, {
+            brand: wizardState.brandName,
+            price_min: wizardState.priceMin,
+            price_max: wizardState.priceMax,
+            discount: wizardState.discount
+        });
+        
+        flipkartLink = flipkartLink || generateFallbackUrl('flipkart', cat.search, {
+            brand: wizardState.brandName,
+            price_min: wizardState.priceMin,
+            price_max: wizardState.priceMax,
+            discount: wizardState.discount
+        });
+    }
+    
+    wizardState.generatedUrl = flipkartLink;
+    wizardState.myntraUrl = myntraLink;
     
     // Build summary
     let html = `<p><span>📦 Category:</span> ${cat.name}</p>`;
@@ -373,13 +419,76 @@ async function showResult() {
     if (wizardState.discount > 0) {
         html += `<p><span>🏷️ Discount:</span> ${wizardState.discount}%+ off</p>`;
     }
-    html += `<p><span>🏪 Store:</span> <span class="store-name">${store.charAt(0).toUpperCase() + store.slice(1)}</span></p>`;
+    
+    if (isFashion) {
+        html += `<p><span>🏪 Available on:</span> <span class="store-name">Flipkart</span> & <span class="store-name">Myntra</span></p>`;
+    } else {
+        html += `<p><span>🏪 Store:</span> <span class="store-name">Flipkart</span></p>`;
+    }
     summary.innerHTML = html;
     
-    // Update button
-    document.getElementById('shopNowBtn').href = wizardState.generatedUrl;
-    document.getElementById('shopNowIcon').textContent = STORE_ICONS[store] || '🛒';
-    document.getElementById('shopNowStore').textContent = store.charAt(0).toUpperCase() + store.slice(1);
+    // Update buttons based on category type
+    const actionsDiv = document.querySelector('#wizardResult .result-actions');
+    
+    if (isFashion) {
+        // Show BOTH Flipkart and Myntra buttons
+        actionsDiv.innerHTML = `
+            <div class="dual-store-buttons">
+                <a href="${flipkartLink}" id="shopFlipkartBtn" class="shop-now-btn flipkart-btn" target="_blank">
+                    <span>🛒</span>
+                    <span>Shop on Flipkart</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+                <a href="${myntraLink}" id="shopMyntraBtn" class="shop-now-btn myntra-btn" target="_blank">
+                    <span>👗</span>
+                    <span>Shop on Myntra</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+            </div>
+            <div class="result-subactions">
+                <button class="copy-link-btn" id="resultCopyBtn">📋 Copy Flipkart</button>
+                <button class="copy-link-btn" id="copyMyntraBtn">📋 Copy Myntra</button>
+                <button class="new-search-btn" id="newSearchBtn">🔄 New Search</button>
+            </div>
+        `;
+        
+        // Attach copy handlers for dual buttons
+        document.getElementById('resultCopyBtn').onclick = () => {
+            navigator.clipboard.writeText(flipkartLink);
+            document.getElementById('resultCopyBtn').textContent = '✅ Copied!';
+            setTimeout(() => document.getElementById('resultCopyBtn').textContent = '📋 Copy Flipkart', 2000);
+        };
+        document.getElementById('copyMyntraBtn').onclick = () => {
+            navigator.clipboard.writeText(myntraLink);
+            document.getElementById('copyMyntraBtn').textContent = '✅ Copied!';
+            setTimeout(() => document.getElementById('copyMyntraBtn').textContent = '📋 Copy Myntra', 2000);
+        };
+    } else {
+        // Single Flipkart button for electronics
+        actionsDiv.innerHTML = `
+            <a href="${flipkartLink}" id="shopNowBtn" class="shop-now-btn" target="_blank">
+                <span id="shopNowIcon">🛒</span>
+                <span>Shop Now on <span id="shopNowStore">Flipkart</span></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <div class="result-subactions">
+                <button class="copy-link-btn" id="resultCopyBtn">📋 Copy Link</button>
+                <button class="new-search-btn" id="newSearchBtn">🔄 New Search</button>
+            </div>
+        `;
+        
+        // Attach copy handler
+        document.getElementById('resultCopyBtn').onclick = () => {
+            navigator.clipboard.writeText(flipkartLink);
+            document.getElementById('resultCopyBtn').textContent = '✅ Copied!';
+            setTimeout(() => document.getElementById('resultCopyBtn').textContent = '📋 Copy Link', 2000);
+        };
+    }
+    
+    // Attach new search handler
+    document.getElementById('newSearchBtn').onclick = () => {
+        resetWizard();
+    };
     
     // Update progress to completed
     document.querySelectorAll('.progress-step').forEach(s => s.classList.add('completed'));

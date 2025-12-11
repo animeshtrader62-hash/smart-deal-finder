@@ -1268,6 +1268,38 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
     color: white;
 }
 
+/* Dual Store Buttons for Fashion */
+.dual-store-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.dual-store-buttons .shop-now-btn {
+    padding: 16px 30px;
+    font-size: 16px;
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 200px;
+    max-width: 280px;
+    justify-content: center;
+}
+.flipkart-btn {
+    background: linear-gradient(135deg, var(--flipkart) 0%, #1a5dc4 100%);
+    box-shadow: 0 10px 30px rgba(40, 116, 240, 0.3);
+}
+.flipkart-btn:hover {
+    box-shadow: 0 15px 40px rgba(40, 116, 240, 0.4);
+}
+.myntra-btn {
+    background: linear-gradient(135deg, var(--myntra) 0%, #d62b57 100%);
+    box-shadow: 0 10px 30px rgba(255, 63, 108, 0.3);
+}
+.myntra-btn:hover {
+    box-shadow: 0 15px 40px rgba(255, 63, 108, 0.4);
+}
+
 /* Wizard Mobile */
 @media (max-width: 768px) {
     .category-wizard { padding: 20px 15px; }
