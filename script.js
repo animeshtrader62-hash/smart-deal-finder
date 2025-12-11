@@ -1559,6 +1559,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Hero Search functionality (declared early for suggestions)
     const heroSearchBtn = document.getElementById('heroSearchBtn');
     const heroSearch = document.getElementById('heroSearch');
+    const heroSearchWrapperRef = document.querySelector('.hero-search');
     
         if (heroSearch) {
             heroSearch.addEventListener('input', (e) => {
@@ -1579,7 +1580,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             document.addEventListener('click', (e) => {
-                if (!heroSearchWrapper.contains(e.target)) {
+                if (heroSearchWrapperRef && !heroSearchWrapperRef.contains(e.target)) {
                     suggestionBox.style.display = 'none';
                 }
             });
