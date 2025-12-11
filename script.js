@@ -2779,3 +2779,42 @@ document.addEventListener('DOMContentLoaded', () => {
         productObserver.observe(productsGrid, { childList: true });
     }
 });
+
+// ===== Telegram Bot Popup =====
+const TELEGRAM_POPUP_KEY = 'smartdeals_telegram_popup_shown';
+const TELEGRAM_POPUP_DELAY = 15000; // 15 seconds after page load
+
+function showTelegramPopup() {
+    const popup = document.getElementById('telegramPopup');
+    if (popup) {
+        popup.style.display = 'block';
+    }
+}
+
+function closeTelegramPopup() {
+    const popup = document.getElementById('telegramPopup');
+    if (popup) {
+        popup.style.display = 'none';
+        // Remember that user closed it (don't show for 24 hours)
+        try {
+            localStorage.setItem(TELEGRAM_POPUP_KEY, Date.now().toString());
+        } catch (e) {}
+    }
+}
+
+function shouldShowTelegramPopup() {
+    try {
+        const lastShown = localStorage.getItem(TELEGRAM_POPUP_KEY);
+        if (!lastShown) return true;
+        // Show again after 24 hours
+        const hoursSinceShown = (Date.now() - parseInt(lastShown)) / (1000 * 60 * 60);
+        return hoursSinceShown >= 24;
+    } catch (e) {
+        return true;
+    }
+}
+
+// Show popup after delay if user hasn't dismissed it recently
+if (shouldShowTelegramPopup()) {
+    setTimeout(showTelegramPopup, TELEGRAM_POPUP_DELAY);
+}
