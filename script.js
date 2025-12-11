@@ -943,13 +943,21 @@ async function generateDirectLink(store, query, filters = {}) {
         const data = await APIManager.fetch(`${API_BASE}/generate-link?${params.toString()}`);
         
         if (data.success && data.affiliate_url) {
-            return data.affiliate_url;
+            // Validate the URL is a legitimate store/affiliate link
+            const validDomains = ['flipkart.com', 'myntra.com', 'ajio.com', 'amazon.', 'ekaro.in', 'fkrt.it', 'amzn.to'];
+            const isValidLink = validDomains.some(domain => data.affiliate_url.toLowerCase().includes(domain));
+            
+            if (isValidLink) {
+                return data.affiliate_url;
+            }
+            console.warn('API returned invalid affiliate URL:', data.affiliate_url);
         }
-        // If API returns success but no affiliate URL, use original
+        // If API returns success but no valid affiliate URL, use original
         if (data.original_url) {
             return data.original_url;
         }
-        return null;
+        // Generate fallback
+        return generateFallbackUrl(store, query, filters);
     } catch (error) {
         console.error('Link generation error:', error);
         // Fallback: Generate URL locally
